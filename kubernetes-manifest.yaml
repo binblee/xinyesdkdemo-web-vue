@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: xinyesdkdemo-web-vue-deployment
+  labels:
+    app: xinyesdkdemo-web-vue
+spec:
+  replicas: 1 # Adjust as needed
+  selector:
+    matchLabels:
+      app: xinyesdkdemo-web-vue
+  template:
+    metadata:
+      labels:
+        app: xinyesdkdemo-web-vue
+    spec:
+      containers:
+      - name: xinyesdkdemo-web-vue-container
+        # IMPORTANT: Replace with your actual image name and tag after building and pushing
+        # e.g., your-registry/xinyesdkdemo-web-vue:latest
+        image: registry.cn-hangzhou.aliyuncs.com/jingshanlb/xinyesdkdemo-web-vue-app:latest
+        ports:
+        - containerPort: 80 # This should match the port exposed in your Dockerfile (Nginx default is 80)
+        resources: # Optional: Define resource requests and limits
+          requests:
+            memory: "64Mi"
+            cpu: "100m" # 0.1 CPU core
+          limits:
+            memory: "128Mi"
+            cpu: "500m" # 0.5 CPU core
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: xinyesdkdemo-web-vue-service
+  labels:
+    app: xinyesdkdemo-web-vue
+spec:
+  type: LoadBalancer # Use LoadBalancer for cloud providers. For local (Minikube/Kind), consider NodePort or ClusterIP.
+  selector:
+    app: xinyesdkdemo-web-vue # This must match the labels of your Deployment's pods
+  ports:
+  - protocol: TCP
+    port: 80       # Port the service will be available on externally (if LoadBalancer) or internally
+    targetPort: 80 # Port on the pods that the service will forward traffic to (containerPort)
+    # If using type: NodePort, you might add a line like:
+    # nodePort: 30080 # Example NodePort, choose an available port in the default range (30000-32767)
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: xinyesdkdemo-web-vue-ingress
+  labels:
+    app: xinyesdkdemo-web-vue
+  annotations: {}
+spec:
+  rules:
+  - host: xinyesdkdemo.example.com # IMPORTANT: Replace with your actual hostname
+    http:
+      paths:
+      - path: /
+        pathType: Prefix 
+        backend:
+          service:
+            name: xinyesdkdemo-web-vue-service # Must match your Service name
+            port:
+              number: 80 # Must match the port your Service exposes
+  # Optional: TLS configuration
+  # tls:
+  # - hosts:
+  #   - xinyesdkdemo.example.com
+  #   secretName: xinyesdkdemo-tls-secret # You'll need to create this Secret with your TLS cert and key

@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vite + Vue</title>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script type="module" src="/src/main.js"></script>
+    <script type="text/javascript" src="https://doc.dcloud.net.cn/uni.webview.1.5.6.js"></script>
+		<!-- <script type="text/javascript">
+			document.addEventListener('UniAppJSBridgeReady', function() {
+				document.querySelector('.btn-list').addEventListener('click', function(evt) {
+					var target = evt.target;
+					if (target.tagName === 'BUTTON') {
+						var action = target.getAttribute('data-action');
+						switch (action) {
+							case 'switchTab':
+								uni.switchTab({
+									url: '/pages/tabBar/API/API'
+								});
+								break;
+							case 'reLaunch':
+								uni.reLaunch({
+									url: '/pages/tabBar/component/component'
+								});
+								break;
+							case 'navigateBack':
+								uni.navigateBack({
+									delta: 1
+								});
+								break;
+							default:
+								uni[action]({
+									url: '/pages/component/button/button'
+								});
+								break;
+						}
+					}
+				});
+				document.getElementById('postMessage').addEventListener('click', function() {
+					uni.postMessage({
+						data: {
+							action: 'message'
+						}
+					});
+				});
+			});
+		</script> -->
+  </body>
+</html>
