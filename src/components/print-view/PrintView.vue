@@ -2,7 +2,9 @@
 	<view style="display: flex; flex-direction: column; align-items: center; justify-content: flex-start; height: 100vh;">
 		<view style="display: flex; flex-direction: column; align-items: center;">
 			Content inside webview
-			<button @click="sendMessageToHostApp" class="action_btn">Send Message to Host</button>
+			<button @click="showNativeToast" class="action_btn">Show Android Toast</button>
+			<button @click="sendDataToNative" class="action_btn">Send Data to Android & Get Response</button>
+			<button @click="notifyActivity" class="action_btn">Notify Activity</button>
 		</view>
 	</view>
 </template>
@@ -10,12 +12,30 @@
 <script>
 export default {
 	methods: {
-		sendMessageToHostApp() {
-			if (window.parent !== window) {
-				// Ensure we are in an iframe/webview
-				window.parent.postMessage({ type: 'messageFromWebview', payload: 'Hello from PrintView!' }, '*');
+		showNativeToast() {
+			if (window.Android && typeof window.Android.showToast === 'function') {
+				// Calls the showToast method in your WebAppInterface
+				window.Android.showToast('Hello from JavaScript in the web page!');
 			} else {
-				console.warn('Not running in a webview or iframe, cannot post message to parent window.');
+				console.warn('Android interface not available, cannot call showToast.');
+			}
+		},
+		sendDataToNative() {
+			if (window.Android && typeof window.Android.showToast === 'function') {
+                var data = "Important Information from JS";
+                // Calls processData and gets a return value
+                var response = window.Android.processData(data);
+                alert("Response from Android: " + response); // Show response in a JS alert
+                // document.getElementById('responseDiv').innerText = "Android processed: " + response;
+			} else {
+				console.warn('Android interface not available, cannot call processData.');
+			}
+		},
+		notifyActivity() {
+			if (window.Android && typeof window.Android.showToast === 'function') {
+                window.Android.sendMessageToActivity("User clicked a special button!");
+			} else {
+				console.warn('Android interface not available, cannot call sendMessageToActivity.');
 			}
 		}
 	}
