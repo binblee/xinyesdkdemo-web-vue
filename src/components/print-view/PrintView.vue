@@ -1,10 +1,14 @@
 <template>
 	<view style="display: flex; flex-direction: column; align-items: center; justify-content: flex-start; height: 100vh;">
 		<view style="display: flex; flex-direction: column; align-items: center;">
-			Content inside webview
+			Toasts
 			<button @click="showNativeToast" class="action_btn">Show Android Toast</button>
 			<button @click="sendDataToNative" class="action_btn">Send Data to Android & Get Response</button>
 			<button @click="notifyActivity" class="action_btn">Notify Activity</button>
+		</view>
+		<view style="display: flex; flex-direction: column; align-items: center;">
+			Print
+			<button @click="startSampleTsplPrint" class="action_btn">startSampleTsplPrint</button>
 		</view>
 	</view>
 </template>
@@ -12,6 +16,15 @@
 <script>
 export default {
 	methods: {
+		startSampleTsplPrint() {
+			if (window.Android && typeof window.Android.showToast === 'function') {
+				// Calls the showToast method in your WebAppInterface
+				window.Android.startSampleTsplPrint();
+			} else {
+				console.warn('Android interface not available, cannot call startSampleTsplPrint.');
+			}
+
+		},
 		showNativeToast() {
 			if (window.Android && typeof window.Android.showToast === 'function') {
 				// Calls the showToast method in your WebAppInterface
