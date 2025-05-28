@@ -110,6 +110,69 @@ class JSPrinterBridge {
     }
 
     /**
+     * Prints multi-line text using the AndroidTSPLPrinter interface.
+    * @param {number} x X-coordinate in dots.
+     * @param {number} y Y-coordinate in dots.
+     * @param {string} fontIdentifier Font identifier (e.g., "TSS24.BF2" for Simplified Chinese).
+     * @param {number} rotation Rotation angle (0, 90, 180, 270).
+     * @param {number} xMultiplier Horizontal magnification.
+     * @param {number} yMultiplier Vertical magnification.
+     * @param {number} lineHeightPx - The approximate height of a single line of text in printer dots (pixels)
+     *                                for the given font and yMultiplier. This is crucial!
+     * @param {string} multiLineContent - The string containing newlines (\n).
+     * @returns {JSPrinterBridge} this instance for chaining.
+     */
+     textMultiLines(
+        x,
+        y,
+        fontIdentifier,
+        rotation,
+        xMultiplier,
+        yMultiplier,
+        lineHeightPx, // You MUST determine this value
+        multiLineContent
+    ) {
+        if (typeof AndroidTSPLPrinter !== 'undefined' && AndroidTSPLPrinter.text) {
+            if (typeof multiLineContent !== 'string') {
+                console.error("Content must be a string.");
+                return;
+            }
+            if (lineHeightPx <= 0) {
+                console.warn("lineHeightPx should be a positive value. Spacing might be incorrect.");
+                // Default to a small value if not provided, but it's better to require it
+                lineHeightPx = 20; // Example default, likely incorrect
+            }
+
+            const lines = multiLineContent.split('\n');
+            let currentY = y;
+
+            lines.forEach(line => {
+                // You might want to trim the line or handle empty lines specifically
+                if (line.trim() !== "") { // Example: Skip printing if line is only whitespace
+                    try {
+                        text(
+                            x,
+                            currentY,
+                            fontIdentifier,
+                            rotation,
+                            xMultiplier,
+                            yMultiplier,
+                            line
+                        );
+                    } catch (e) {
+                        console.error(`Error printing line "${line}" via native interface:`, e);
+                        // Decide if you want to stop or continue
+                    }
+                }
+                currentY += lineHeightPx; // Increment Y for the next line
+            });
+        } else {
+            console.warn("JSPrinterBridge: text called but native interface is not available or method is missing.");
+        }
+        return this; // Enable chaining
+    }    
+
+    /**
      * Executes the print job for a specified number of labels.
      * @param {number} quantity Number of labels to print.
      * @returns {JSPrinterBridge} this instance for chaining (though typically print is the last call).
@@ -122,6 +185,8 @@ class JSPrinterBridge {
         }
         return this; // Usually last, but still return for consistency
     }
+
+
 
     // --- Potential alternative: Command Batching ---
     // If making many individual native calls is too slow, you could batch them.
@@ -151,7 +216,17 @@ class JSPrinterBridge {
 //          .cls()
 //          .density(10)
 //          .direction(0) // 0 is TSPLConst.DIRECTION_FORWARD
-//          .text(10, 10, "TSS24.BF2", 0, 1, 1, "你好，print from JS printer bridge") // "0" for a default font, "TSS24.BF2" for Simplified Chinese
+//          .text(10, 10, "TSS24.BF2", 0, 1, 1, "你好，from printer bridge") // "0" for a default font, "TSS24.BF2" for Simplified Chinese
 //          .print(1);
+// Print multi-line text example:
+// const jsPrinter = new JSPrinterBridge();
+// jsPrinter.sizeMm(50.0, 15.0)
+//          .gapMm(2.0, 0.0)
+//          .cls()
+//          .density(10)
+//          .direction(0) // 0 is TSPLConst.DIRECTION_FORWARD
+//          .textMultiLines(10, 10, "TSS24.BF2", 0, 1, 1, 24, "你好，\nprint from JS printer bridge") // "0" for a default font, "TSS24.BF2" for Simplified Chinese
+//          .print(1);
+
 
 export default JSPrinterBridge; // Add this line to export the class as default
