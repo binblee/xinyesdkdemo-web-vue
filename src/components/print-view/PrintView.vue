@@ -14,7 +14,7 @@
 		<view style="display: flex; flex-direction: column; align-items: center;">
 			Print with JSPrinterBridge
 			<button @click="handlePrintSampleTextFromJSPrinterBridge" class="action_btn">打印文字</button>
-			<button @click="handleMultiLineTextPrint" class="action_btn">多行文字打印</button>
+			<button @click="handleMultiLineTextPrint" class="action_btn">多行文字打印(新)</button>
 		</view>
 	</view>
 </template>
@@ -65,9 +65,9 @@ export default {
 			         .gapMm(2.0, 0.0)
 			         .cls()
 			         .density(10)
-			         .direction(0) // 0 is TSPLConst.DIRECTION_FORWARD
-			         .textMultiLines(10, 10, "TSS24.BF2", 0, 1, 1, 24, "你好，\nprint from JS printer bridge") // "0" for a default font, "TSS24.BF2" for Simplified Chinese
-			         .print(1);
+			         .direction(0); // 0 is TSPLConst.DIRECTION_FORWARD
+			jsPrinter.textMultiLines(10, 10, "TSS24.BF2", 0, 1, 1, 24, "你好，\nprint from JS printer bridge"); // "0" for a default font, "TSS24.BF2" for Simplified Chinese
+			jsPrinter.print(1);
 		}
 
 	}

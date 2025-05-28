@@ -111,7 +111,8 @@ class JSPrinterBridge {
 
     /**
      * Prints multi-line text using the AndroidTSPLPrinter interface.
-    * @param {number} x X-coordinate in dots.
+     * @param {object} printerInterface - The AndroidTSPLPrinter instance (e.g., window.AndroidTSPLPrinter).
+     * @param {number} x X-coordinate in dots.
      * @param {number} y Y-coordinate in dots.
      * @param {string} fontIdentifier Font identifier (e.g., "TSS24.BF2" for Simplified Chinese).
      * @param {number} rotation Rotation angle (0, 90, 180, 270).
@@ -123,6 +124,7 @@ class JSPrinterBridge {
      * @returns {JSPrinterBridge} this instance for chaining.
      */
      textMultiLines(
+        printerInterface,
         x,
         y,
         fontIdentifier,
@@ -132,44 +134,43 @@ class JSPrinterBridge {
         lineHeightPx, // You MUST determine this value
         multiLineContent
     ) {
-        if (typeof AndroidTSPLPrinter !== 'undefined' && AndroidTSPLPrinter.text) {
-            if (typeof multiLineContent !== 'string') {
-                console.error("Content must be a string.");
-                return;
-            }
-            if (lineHeightPx <= 0) {
-                console.warn("lineHeightPx should be a positive value. Spacing might be incorrect.");
-                // Default to a small value if not provided, but it's better to require it
-                lineHeightPx = 20; // Example default, likely incorrect
-            }
-
-            const lines = multiLineContent.split('\n');
-            let currentY = y;
-
-            lines.forEach(line => {
-                // You might want to trim the line or handle empty lines specifically
-                if (line.trim() !== "") { // Example: Skip printing if line is only whitespace
-                    try {
-                        text(
-                            x,
-                            currentY,
-                            fontIdentifier,
-                            rotation,
-                            xMultiplier,
-                            yMultiplier,
-                            line
-                        );
-                    } catch (e) {
-                        console.error(`Error printing line "${line}" via native interface:`, e);
-                        // Decide if you want to stop or continue
-                    }
-                }
-                currentY += lineHeightPx; // Increment Y for the next line
-            });
-        } else {
-            console.warn("JSPrinterBridge: text called but native interface is not available or method is missing.");
+        if (typeof printerInterface === 'undefined' || !printerInterface.text) {
+           console.error("AndroidTSPLPrinter interface or text method not found!");
+            return;
         }
-        return this; // Enable chaining
+        if (typeof multiLineContent !== 'string') {
+            console.error("Content must be a string.");
+            return;
+        }
+        if (lineHeightPx <= 0) {
+            console.warn("lineHeightPx should be a positive value. Spacing might be incorrect.");
+            // Default to a small value if not provided, but it's better to require it
+            lineHeightPx = 20; // Example default, likely incorrect
+        }
+
+        const lines = multiLineContent.split('\n');
+        let currentY = y;
+
+        lines.forEach(line => {
+            // You might want to trim the line or handle empty lines specifically
+            if (line.trim() !== "") { // Example: Skip printing if line is only whitespace
+                try {
+                    text(
+                        x,
+                        currentY,
+                        fontIdentifier,
+                        rotation,
+                        xMultiplier,
+                        yMultiplier,
+                        line
+                    );
+                } catch (e) {
+                    console.error(`Error printing line "${line}" via native interface:`, e);
+                    // Decide if you want to stop or continue
+                }
+            }
+            currentY += lineHeightPx; // Increment Y for the next line
+        });
     }    
 
     /**
@@ -224,9 +225,10 @@ class JSPrinterBridge {
 //          .gapMm(2.0, 0.0)
 //          .cls()
 //          .density(10)
-//          .direction(0) // 0 is TSPLConst.DIRECTION_FORWARD
-//          .textMultiLines(10, 10, "TSS24.BF2", 0, 1, 1, 24, "你好，\nprint from JS printer bridge") // "0" for a default font, "TSS24.BF2" for Simplified Chinese
-//          .print(1);
+//          .direction(0); // 0 is TSPLConst.DIRECTION_FORWARD
+
+//          jsPrinter.textMultiLines(10, 10, "TSS24.BF2", 0, 1, 1, 24, "你好，\nprint from JS printer bridge"); // "0" for a default font, "TSS24.BF2" for Simplified Chinese
+//          jsPrinter.print(1);
 
 
 export default JSPrinterBridge; // Add this line to export the class as default
