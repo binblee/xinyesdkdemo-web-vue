@@ -2,64 +2,60 @@
 	<view style="display: flex; flex-direction: column; align-items: center; justify-content: flex-start; height: 100vh;">
 		<view style="display: flex; flex-direction: column; align-items: center;">
 			Toasts
-			<button @click="showNativeToast" class="action_btn">Show Android Toast</button>
-			<button @click="sendDataToNative" class="action_btn">Send Data to Android & Get Response</button>
-			<button @click="notifyActivity" class="action_btn">Notify Activity</button>
+			<button @click="handleShowNativeToast" class="action_btn">Show Android Toast</button>
+			<button @click="handleSendDataToNative" class="action_btn">Send Data to Android & Get Response</button>
+			<button @click="handleNotifyActivity" class="action_btn">Notify Activity</button>
 		</view>
 		<view style="display: flex; flex-direction: column; align-items: center;">
 			Print
-			<button @click="startSampleTsplPrint" class="action_btn">startSampleTsplPrint</button>
-			<button @click="printSampleBarcode" class="action_btn">printSampleBarcode</button>
+			<button @click="handleStartSampleTsplPrint" class="action_btn">startSampleTsplPrint</button>
+			<button @click="handlePrintSampleBarcode" class="action_btn">printSampleBarcode</button>
+		</view>
+		<view style="display: flex; flex-direction: column; align-items: center;">
+			Print with JSPrinterBridge
+			<button @click="handlePrintSampleTextFromJSPrinterBridge" class="action_btn">printSampleTextFromJSPrinterBridge</button>
 		</view>
 	</view>
 </template>
 
 <script>
+import {
+	startSampleTsplPrint,
+	printSampleBarcode,
+	showNativeToast,
+	sendDataToNative,
+	notifyActivity
+} from '@/utils/nativeBridge.js';
+
+import JSPrinterBridge from '@/utils/JSPrinterBridge.js';
+
 export default {
 	methods: {
-		startSampleTsplPrint() {
-			if (window.Android && typeof window.Android.showToast === 'function') {
-				// Calls the showToast method in your WebAppInterface
-				window.Android.startSampleTsplPrint();
-			} else {
-				console.warn('Android interface not available, cannot call startSampleTsplPrint.');
-			}
-
+		handleStartSampleTsplPrint() {
+			startSampleTsplPrint();
 		},
-		printSampleBarcode() {
-			if (window.Android && typeof window.Android.showToast === 'function') {
-				// Calls the showToast method in your WebAppInterface
-				window.Android.printSampleBarcode();
-			} else {
-				console.warn('Android interface not available, cannot call printSampleBarcode.');
-			}
-
+		handlePrintSampleBarcode() {
+			printSampleBarcode();
 		},
-		showNativeToast() {
-			if (window.Android && typeof window.Android.showToast === 'function') {
-				// Calls the showToast method in your WebAppInterface
-				window.Android.showToast('Hello from JavaScript in the web page!');
-			} else {
-				console.warn('Android interface not available, cannot call showToast.');
-			}
+		handleShowNativeToast() {
+			showNativeToast('Hello from JavaScript in the web page!');
 		},
-		sendDataToNative() {
-			if (window.Android && typeof window.Android.showToast === 'function') {
-                var data = "Important Information from JS";
-                // Calls processData and gets a return value
-                var response = window.Android.processData(data);
-                alert("Response from Android: " + response); // Show response in a JS alert
-                // document.getElementById('responseDiv').innerText = "Android processed: " + response;
-			} else {
-				console.warn('Android interface not available, cannot call processData.');
-			}
+		handleSendDataToNative() {
+			const data = "Important Information from JS";
+			sendDataToNative(data);
 		},
-		notifyActivity() {
-			if (window.Android && typeof window.Android.showToast === 'function') {
-                window.Android.sendMessageToActivity("User clicked a special button!");
-			} else {
-				console.warn('Android interface not available, cannot call sendMessageToActivity.');
-			}
+		handleNotifyActivity() {
+			notifyActivity("User clicked a special button!");
+		},
+		handlePrintSampleTextFromJSPrinterBridge(){
+			const jsPrinter = new JSPrinterBridge();
+			jsPrinter.sizeMm(50.0, 15.0)
+					.gapMm(2.0, 0.0)
+					.cls()
+					.density(10)
+					.direction(0) // 0 is TSPLConst.DIRECTION_FORWARD
+					.text(10, 10, "0", 0, 1, 1, "Hello from JS!") // "0" for a default font
+					.print(1);
 		}
 	}
 }
