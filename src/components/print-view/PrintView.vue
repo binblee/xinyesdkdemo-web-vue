@@ -13,7 +13,7 @@
 		</view>
 		<view style="display: flex; flex-direction: column; align-items: center;">
 			Print with JSPrinterBridge
-			<button @click="handlePrintSampleTextFromJSPrinterBridge" class="action_btn">printSampleTextFromJSPrinterBridge</button>
+			<button @click="handlePrintSampleTextFromJSPrinterBridge" class="action_btn">PrintSampleTextFromJSPrinterBridge</button>
 		</view>
 	</view>
 </template>
@@ -54,7 +54,7 @@ export default {
 					.cls()
 					.density(10)
 					.direction(0) // 0 is TSPLConst.DIRECTION_FORWARD
-					.text(10, 10, "0", 0, 1, 1, "Hello from JS!") // "0" for a default font
+					.text(10, 10, "TSS24.BF2", 0, 1, 1, "你好，print from JS printer bridge") // "0" for a default font, "TSS24.BF2" for Simplified Chinese
 					.print(1);
 		}
 	}

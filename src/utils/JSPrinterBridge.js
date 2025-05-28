@@ -91,7 +91,7 @@ class JSPrinterBridge {
      * Prints text on the label.
      * @param {number} x X-coordinate in dots.
      * @param {number} y Y-coordinate in dots.
-     * @param {string} fontIdentifier Font identifier (e.g., "0", "TST24.BF2", or a TSPLConst numeric value).
+     * @param {string} fontIdentifier Font identifier (e.g., "TSS24.BF2" for Simplified Chinese).
      * @param {number} rotation Rotation angle (0, 90, 180, 270).
      * @param {number} xMultiplier Horizontal magnification.
      * @param {number} yMultiplier Vertical magnification.
@@ -151,7 +151,7 @@ class JSPrinterBridge {
 //          .cls()
 //          .density(10)
 //          .direction(0) // 0 is TSPLConst.DIRECTION_FORWARD
-//          .text(10, 10, "0", 0, 1, 1, "Hello from JS!") // "0" for a default font
+//          .text(10, 10, "TSS24.BF2", 0, 1, 1, "你好，print from JS printer bridge") // "0" for a default font, "TSS24.BF2" for Simplified Chinese
 //          .print(1);
 
 export default JSPrinterBridge; // Add this line to export the class as default
