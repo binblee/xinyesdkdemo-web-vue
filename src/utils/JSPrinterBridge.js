@@ -155,7 +155,7 @@ class JSPrinterBridge {
             // You might want to trim the line or handle empty lines specifically
             if (line.trim() !== "") { // Example: Skip printing if line is only whitespace
                 try {
-                    text(
+                    printerInterface.text(
                         x,
                         currentY,
                         fontIdentifier,

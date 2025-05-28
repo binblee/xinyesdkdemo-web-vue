@@ -14,7 +14,7 @@
 		<view style="display: flex; flex-direction: column; align-items: center;">
 			Print with JSPrinterBridge
 			<button @click="handlePrintSampleTextFromJSPrinterBridge" class="action_btn">打印文字</button>
-			<button @click="handleMultiLineTextPrint" class="action_btn">多行文字打印(新)</button>
+			<button @click="handleMultiLineTextPrint" class="action_btn">多行文字打印</button>
 		</view>
 	</view>
 </template>
