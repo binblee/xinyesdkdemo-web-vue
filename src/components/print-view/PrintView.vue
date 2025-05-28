@@ -9,6 +9,7 @@
 		<view style="display: flex; flex-direction: column; align-items: center;">
 			Print
 			<button @click="startSampleTsplPrint" class="action_btn">startSampleTsplPrint</button>
+			<button @click="printSampleBarcode" class="action_btn">printSampleBarcode</button>
 		</view>
 	</view>
 </template>
@@ -22,6 +23,15 @@ export default {
 				window.Android.startSampleTsplPrint();
 			} else {
 				console.warn('Android interface not available, cannot call startSampleTsplPrint.');
+			}
+
+		},
+		printSampleBarcode() {
+			if (window.Android && typeof window.Android.showToast === 'function') {
+				// Calls the showToast method in your WebAppInterface
+				window.Android.printSampleBarcode();
+			} else {
+				console.warn('Android interface not available, cannot call printSampleBarcode.');
 			}
 
 		},
