@@ -54,7 +54,7 @@ export default {
 					.cls()
 					.density(10)
 					.direction(0) // 0 is TSPLConst.DIRECTION_FORWARD
-					.text(10, 10, "TSS24.BF2", 0, 1, 1, "你好，print from JS printer bridge") // "0" for a default font, "TSS24.BF2" for Simplified Chinese
+					.text(10, 10, "TSS24.BF2", 0, 1, 1, "你好，\nprint from JS printer bridge") // "0" for a default font, "TSS24.BF2" for Simplified Chinese
 					.print(1);
 		}
 	}
