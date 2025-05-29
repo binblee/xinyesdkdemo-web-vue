@@ -13,7 +13,7 @@
 		</view>
 		<view style="display: flex; flex-direction: column; align-items: center;">
 			Print Barcode
-			<button @click="handleBarCodePrint_internal('0-ty12345abc', 0)" class="action_btn">BARCODE(1)</button>
+			<button @click="handleBarCodePrint" class="action_btn">BARCODE(4)</button>
 		</view>
 	</view>
 </template>
