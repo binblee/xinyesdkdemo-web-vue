@@ -1,19 +1,3 @@
-export const startSampleTsplPrint = () => {
-	if (window.Android && typeof window.Android.startSampleTsplPrint === 'function') {
-		window.Android.startSampleTsplPrint();
-	} else {
-		console.warn('Android interface not available, cannot call startSampleTsplPrint.');
-	}
-};
-
-export const printSampleBarcode = () => {
-	if (window.Android && typeof window.Android.printSampleBarcode === 'function') {
-		window.Android.printSampleBarcode();
-	} else {
-		console.warn('Android interface not available, cannot call printSampleBarcode.');
-	}
-};
-
 export const showNativeToast = (message) => {
 	if (window.Android && typeof window.Android.showToast === 'function') {
 		window.Android.showToast(message);

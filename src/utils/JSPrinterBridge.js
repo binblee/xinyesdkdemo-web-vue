@@ -4,69 +4,70 @@
 const TSPLConst = {
     BARCODE_TYPE: {
         CODE_128: "128",        // Code 128
-        CODE_128M: "128M",      // Code 128 with Checksum
-        EAN128: "EAN128",       // EAN128 (also known as GS1-128)
-        CODE_25: "25",          // Code 25 (Interleaved 2 of 5)
-        CODE_25C: "25C",        // Code 25 with Checksum
-        CODE_39: "39",          // Code 39
-        CODE_39C: "39C",        // Code 39 with Checksum
-        CODE_93: "93",          // Code 93
-        EAN13: "EAN13",         // EAN13 (European Article Number)
-        EAN13_2: "EAN13+2",     // EAN13 with 2-digit add-on
-        EAN13_5: "EAN13+5",     // EAN13 with 5-digit add-on
-        EAN8: "EAN8",           // EAN8 (European Article Number)
-        EAN8_2: "EAN8+2",       // EAN8 with 2-digit add-on
-        EAN8_5: "EAN8+5",       // EAN8 with 5-digit add-on
-        CODA: "CODA",           // Codabar
-        POST: "POST",           // Postnet
-        UPCA: "UPCA",           // UPC-A (Universal Product Code)
-        UPCA_2: "UPCA+2",       // UPCA with 2-digit add-on
-        UPCA_5: "UPCA+5",       // UPCA with 5-digit add-on
-        UPCE: "UPCE",           // UPCE (compressed UPC-A)
-        UPCE_2: "UPCE+2",       // UPCE with 2-digit add-on
-        UPCE_5: "UPCE+5",       // UPCE with 5-digit add-on
-        CPOST: "CPOST",         // China Postal Code
-        MSI: "MSI",
-        MSIC: "MSIC",           // MSI with Checksum
-        PLESSEY: "PLESSEY",     // Plessey Code
-        ITF14: "ITF14",         // ITF-14 (Interleaved 2 of 5)
-        EAN14: "EAN14",         // EAN-14 (similar to ITF-14, often used for GTIN-14)
-        CODE_11: "11",          // Code 11
-        TELEPEN: "TELEPEN",     // Telepen Alpha
-        TELEPENN: "TELEPENN",   // Telepen Numeric
-        PLANET: "PLANET",       // Planet Code
-        CODE49: "CODE49",       // Code 49
-        DPI: "DPI",             // Deutsche Post Identcode
-        DPL: "DPL"              // Deutsche Post Leitcode
+        // CODE_128M: "128M",      // Code 128 with Checksum
+        // EAN128: "EAN128",       // EAN128 (also known as GS1-128)
+        // CODE_25: "25",          // Code 25 (Interleaved 2 of 5)
+        // CODE_25C: "25C",        // Code 25 with Checksum
+        // CODE_39: "39",          // Code 39
+        // CODE_39C: "39C",        // Code 39 with Checksum
+        // CODE_93: "93",          // Code 93
+        // EAN13: "EAN13",         // EAN13 (European Article Number)
+        // EAN13_2: "EAN13+2",     // EAN13 with 2-digit add-on
+        // EAN13_5: "EAN13+5",     // EAN13 with 5-digit add-on
+        // EAN8: "EAN8",           // EAN8 (European Article Number)
+        // EAN8_2: "EAN8+2",       // EAN8 with 2-digit add-on
+        // EAN8_5: "EAN8+5",       // EAN8 with 5-digit add-on
+        // CODA: "CODA",           // Codabar
+        // POST: "POST",           // Postnet
+        // UPCA: "UPCA",           // UPC-A (Universal Product Code)
+        // UPCA_2: "UPCA+2",       // UPCA with 2-digit add-on
+        // UPCA_5: "UPCA+5",       // UPCA with 5-digit add-on
+        // UPCE: "UPCE",           // UPCE (compressed UPC-A)
+        // UPCE_2: "UPCE+2",       // UPCE with 2-digit add-on
+        // UPCE_5: "UPCE+5",       // UPCE with 5-digit add-on
+        // CPOST: "CPOST",         // China Postal Code
+        // MSI: "MSI",
+        // MSIC: "MSIC",           // MSI with Checksum
+        // PLESSEY: "PLESSEY",     // Plessey Code
+        // ITF14: "ITF14",         // ITF-14 (Interleaved 2 of 5)
+        // EAN14: "EAN14",         // EAN-14 (similar to ITF-14, often used for GTIN-14)
+        // CODE_11: "11",          // Code 11
+        // TELEPEN: "TELEPEN",     // Telepen Alpha
+        // TELEPENN: "TELEPENN",   // Telepen Numeric
+        // PLANET: "PLANET",       // Planet Code
+        // CODE49: "CODE49",       // Code 49
+        // DPI: "DPI",             // Deutsche Post Identcode
+        // DPL: "DPL"              // Deutsche Post Leitcode
     },
     //todo: need to check if these are correct 
     BARCODE_HUMAN_READABLE: {
         NONE: 0,
-        DEFAULT_ALIGN: 1, // Typically 'Below' for linear. Corresponds to Xinye SDK's READABLE_LEFT 
+        DEFAULT_ALIGN: 1, // Typically 'Below' for linear. 
+                          // Corresponds to Xinye SDK's READABLE_LEFT 
                           // if it implies default.
-        ALIGN_LEFT: 1,    // As Xinye SDK Java constants
-        ALIGN_CENTER: 2,
-        ALIGN_RIGHT: 3,
+        // ALIGN_LEFT: 1,    // As Xinye SDK Java constants
+        // ALIGN_CENTER: 2,
+        // ALIGN_RIGHT: 3,
 
         // Standard TSPL human readable options:
-        NONE_STANDARD: 0, // No human readable text
-        BELOW_STANDARD: 1,// Human readable text below barcode
-        ABOVE_STANDARD: 2 // Human readable text above barcode (not always supported)
+        // NONE_STANDARD: 0, // No human readable text
+        // BELOW_STANDARD: 1,// Human readable text below barcode
+        // ABOVE_STANDARD: 2 // Human readable text above barcode (not always supported)
     },
 
     ROTATION: {
         ANGLE_0: 0,
-        ANGLE_90: 90,
-        ANGLE_180: 180,
-        ANGLE_270: 270
+        // ANGLE_90: 90,
+        // ANGLE_180: 180,
+        // ANGLE_270: 270
     },
 
-    TEXT_ALIGNMENT: { // For TEXT command, if SDK supports alignment parameter directly
-                      // (Often alignment is done by calculating X position)
-        LEFT: 1,
-        CENTER: 2,
-        RIGHT: 3
-    },
+    // TEXT_ALIGNMENT: { // For TEXT command, if SDK supports alignment parameter directly
+    //                   // (Often alignment is done by calculating X position)
+    //     LEFT: 1,
+    //     CENTER: 2,
+    //     RIGHT: 3
+    // },
 
     DIRECTION: {
         FORWARD: 0, // Normal printing direction
@@ -104,18 +105,18 @@ const TSPLConst = {
         }
     },
 
-    CODE_PAGE: { // International character sets / Code Pages
-        PAGE_437: 437,    // USA, Standard Europe
-        PAGE_850: 850,    // Multilingual
-        PAGE_852: 852,    // Latin 2 (Central Europe)
-        PAGE_860: 860,    // Portuguese
-        PAGE_863: 863,    // Canadian/French
-        PAGE_865: 865,    // Nordic
-        PAGE_1250: 1250,  // Windows Central Europe
-        PAGE_1252: 1252,  // Windows Latin 1 (ANSI)
-        PAGE_1253: 1253,  // Windows Greek
-        PAGE_1254: 1254   // Windows Turkish
-    },
+    // CODE_PAGE: { // International character sets / Code Pages
+    //     PAGE_437: 437,    // USA, Standard Europe
+    //     PAGE_850: 850,    // Multilingual
+    //     PAGE_852: 852,    // Latin 2 (Central Europe)
+    //     PAGE_860: 860,    // Portuguese
+    //     PAGE_863: 863,    // Canadian/French
+    //     PAGE_865: 865,    // Nordic
+    //     PAGE_1250: 1250,  // Windows Central Europe
+    //     PAGE_1252: 1252,  // Windows Latin 1 (ANSI)
+    //     PAGE_1253: 1253,  // Windows Greek
+    //     PAGE_1254: 1254   // Windows Turkish
+    // },
 
     BITMAP_MODE: { // For PUTBMP or BITMAP commands
         OVERWRITE: 0,
@@ -129,18 +130,11 @@ const TSPLConst = {
         XOR_C: 5
     },
 
-    STATUS: { // General status indicators
-        CONNECTED: 1,
-        DISCONNECTED: 0
-    }
+    // STATUS: { // General status indicators
+    //     CONNECTED: 1,
+    //     DISCONNECTED: 0
+    // }
 };
-
-// To make it available globally if not using modules:
-// window.TSPLConst = TSPLConst;
-
-// Or for ES6 modules, you would typically have this at the end of the file:
-// export default Object.freeze(TSPLConst); // Freezing makes it truly constant
-
 
 /**
  *
@@ -261,21 +255,13 @@ class JSPrinterBridge {
      * @param {string} codeType The type of barcode (e.g., "128", "EAN13", "QRCODE").
      *                 Check your printer's TSPL manual for supported types.
      * @param {number} height The height of the barcode in dots.
-     * @param {number} humanReadable Controls the display of human-readable characters:
-     *                      0: Not readable
-     *                      1: Readable, characters below barcode
-     *                      2: Readable, characters above barcode (not all types support this)
-     *                      (Refer to printer manual for specific values)
-     * @param {number} rotation The rotation of the barcode: 0, 90, 180, 270 degrees.
-     * @param {number} narrow The width of the narrowest bar/element in dots (for linear barcodes). default 2.
-     * @param {number} wide The width of the widest bar/element in dots (for linear barcodes). default 2.
      * @param {string} content The data to be encoded in the barcode.
      */
     barcode(
-        x, y, codeType, height, humanReadable, rotation, narrow, wide, content
+        x, y, codeType, height, content
     ) {
         if (typeof AndroidTSPLPrinter !== 'undefined' && AndroidTSPLPrinter.text) {
-            AndroidTSPLPrinter.barcode(x, y, codeType, height, humanReadable, rotation, narrow, wide, content);
+            AndroidTSPLPrinter.barcode(x, y, codeType, height, content);
         } else {
             console.warn("JSPrinterBridge: barcode called but native interface is not available or method is missing.");
         }

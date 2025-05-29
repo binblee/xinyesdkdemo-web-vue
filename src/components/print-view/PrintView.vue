@@ -13,7 +13,7 @@
 		</view>
 		<view style="display: flex; flex-direction: column; align-items: center;">
 			Print Barcode
-			<button @click="handleBarCodePrint" class="action_btn">BARCODE(4)</button>
+			<button @click="handleBarCodePrint('ty1234567890123',2)" class="action_btn">BARCODE(2)</button>
 		</view>
 	</view>
 </template>
@@ -57,27 +57,19 @@ export default {
 					.cls()
 					.density(10)
 					.direction(TSPLConst.DIRECTION.FORWARD)
-					.text(10, 10, TSPLConst.FONT.SIMPLIFIED_CHINESE, 0, 1, 1, "你好") // "0" for a default font, "TSS24.BF2" for Simplified Chinese
-					.text(10, 10+24, TSPLConst.FONT.SIMPLIFIED_CHINESE, 0, 1, 1, "from printer bridge") // "0" for a default font, "TSS24.BF2" for Simplified Chinese
+					.text(5, 10, TSPLConst.FONT.SIMPLIFIED_CHINESE, 0, 1, 1, "你好") // "0" for a default font, "TSS24.BF2" for Simplified Chinese
+					.text(5, 10+24, TSPLConst.FONT.SIMPLIFIED_CHINESE, 0, 1, 1, "from printer bridge") // "0" for a default font, "TSS24.BF2" for Simplified Chinese
 					.print(1);
 		},
-		handleBarCodePrint_internal(content, humanReadable) {
+		handleBarCodePrint(content, quantity = 1 ) {
 			const jsPrinter = new JSPrinterBridge();
 			jsPrinter.sizeMm(50.0, 15.0)
 					.gapMm(2.0, 0.0)
 					.cls()
 					.density(7)
 					.direction(TSPLConst.DIRECTION.FORWARD)
-					.barcode(10, 10,
-						TSPLConst.BARCODE_TYPE.CODE_128, 50, humanReadable,
-						0, 2, 2, content)
-					.print(1);
-		},
-		handleBarCodePrint(){
-			this.handleBarCodePrint_internal('0-ty12345abc', 0);
-			this.handleBarCodePrint_internal('1-ty12345abc', 1);
-			this.handleBarCodePrint_internal('2-ty12345abc', 2);
-			this.handleBarCodePrint_internal('3-ty12345abc', 3);
+					.barcode(10, 10, TSPLConst.BARCODE_TYPE.CODE_128, 50, content)
+					.print(quantity);
 		},
 	}
 }
