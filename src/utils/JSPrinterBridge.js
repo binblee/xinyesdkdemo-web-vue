@@ -1,5 +1,4 @@
 
-// TSPLConst.js
 // JavaScript constants mirroring the provided Java TSPLConst class
 
 const TSPLConst = {

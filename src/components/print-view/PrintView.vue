@@ -20,8 +20,6 @@
 
 <script>
 import {
-	startSampleTsplPrint,
-	printSampleBarcode,
 	showNativeToast,
 	sendDataToNative,
 	notifyActivity
@@ -71,7 +69,7 @@ export default {
 					.density(7)
 					.direction(TSPLConst.DIRECTION.FORWARD)
 					.barcode(10, 10,
-						TSPLConst.BARCODE_TYPE.CODE128, humanReadable,
+						TSPLConst.BARCODE_TYPE.CODE_128, humanReadable,
 						50, 0, 2, 2, content)
 					.print(1);
 		},
