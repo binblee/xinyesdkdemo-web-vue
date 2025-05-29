@@ -13,7 +13,7 @@
 		</view>
 		<view style="display: flex; flex-direction: column; align-items: center;">
 			Print Barcode
-			<button @click="handleBarCodePrint" class="action_btn">BARCODE</button>
+			<button @click="handleBarCodePrint_internal('0-ty12345abc', 0)" class="action_btn">BARCODE(0)</button>
 		</view>
 	</view>
 </template>
@@ -70,8 +70,9 @@ export default {
 					.cls()
 					.density(7)
 					.direction(TSPLConst.DIRECTION.FORWARD)
-					.barcode(10, 10, TSPLConst.BARCODE_TYPE.CODE128, humanReadable,
-						50, TSPLConst.ROTATION.ANGLE_0, 2, 2, content) // Example barcode
+					.barcode(10, 10,
+						TSPLConst.BARCODE_TYPE.CODE128, humanReadable,
+						50, 0, 2, 2, content)
 					.print(1);
 		},
 		handleBarCodePrint(){
