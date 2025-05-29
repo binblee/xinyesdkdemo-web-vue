@@ -43,9 +43,9 @@ const TSPLConst = {
     //todo: need to check if these are correct 
     BARCODE_HUMAN_READABLE: {
         NONE: 0,
-        DEFAULT_ALIGN: 1, // Typically 'Below' for linear. Corresponds to your READABLE_LEFT if it implies default.
-                          // If SDK has special alignment for human readable part:
-        ALIGN_LEFT: 1,    // As per your Java constants
+        DEFAULT_ALIGN: 1, // Typically 'Below' for linear. Corresponds to Xinye SDK's READABLE_LEFT 
+                          // if it implies default.
+        ALIGN_LEFT: 1,    // As Xinye SDK Java constants
         ALIGN_CENTER: 2,
         ALIGN_RIGHT: 3,
 
@@ -252,6 +252,35 @@ class JSPrinterBridge {
             console.warn("JSPrinterBridge: text called but native interface is not available or method is missing.");
         }
         return this;
+    }
+    
+    /**
+     * Prints a barcode.
+     *
+     * @param {number} x The horizontal starting position in dots.
+     * @param {number} y The vertical starting position in dots.
+     * @param {string} codeType The type of barcode (e.g., "128", "EAN13", "QRCODE").
+     *                 Check your printer's TSPL manual for supported types.
+     * @param {number} height The height of the barcode in dots.
+     * @param {number} humanReadable Controls the display of human-readable characters:
+     *                      0: Not readable
+     *                      1: Readable, characters below barcode
+     *                      2: Readable, characters above barcode (not all types support this)
+     *                      (Refer to printer manual for specific values)
+     * @param {number} rotation The rotation of the barcode: 0, 90, 180, 270 degrees.
+     * @param {number} narrow The width of the narrowest bar/element in dots (for linear barcodes). default 2.
+     * @param {number} wide The width of the widest bar/element in dots (for linear barcodes). default 2.
+     * @param {string} content The data to be encoded in the barcode.
+     */
+    barcode(
+        x, y, codeType, height, humanReadable, rotation, narrow, wide, content
+    ) {
+        if (typeof AndroidTSPLPrinter !== 'undefined' && AndroidTSPLPrinter.text) {
+            AndroidTSPLPrinter.barcode(x, y, codeType, height, humanReadable, rotation, narrow, wide, content);
+        } else {
+            console.warn("JSPrinterBridge: barcode called but native interface is not available or method is missing.");
+        }
+        return this;        
     }
 
     /**
