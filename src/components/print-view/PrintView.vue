@@ -14,7 +14,7 @@
 		<view style="display: flex; flex-direction: column; align-items: center;">
 			Print with JSPrinterBridge
 			<button @click="handlePrintSampleTextFromJSPrinterBridge" class="action_btn">打印文字</button>
-			<button @click="handleMultiLineTextPrint" class="action_btn">多行文字打印(5)</button>
+			<button @click="handleMultiLineTextPrint" class="action_btn">多行文字打印</button>
 		</view>
 	</view>
 </template>
@@ -28,7 +28,7 @@ import {
 	notifyActivity
 } from '@/utils/nativeBridge.js';
 
-import JSPrinterBridge from '@/utils/JSPrinterBridge.js';
+import {TSPLConst, JSPrinterBridge} from '@/utils/JSPrinterBridge.js';
 
 export default {
 	methods: {
@@ -54,8 +54,8 @@ export default {
 					.gapMm(2.0, 0.0)
 					.cls()
 					.density(10)
-					.direction(0) // 0 is TSPLConst.DIRECTION_FORWARD
-					.text(10, 10, "TSS24.BF2", 0, 1, 1, "你好 from printer bridge") // "0" for a default font, "TSS24.BF2" for Simplified Chinese
+					.direction(TSPLConst.DIRECTION.FORWARD)
+					.text(10, 10, TSPLConst.FONT.SIMPLIFIED_CHINESE, 0, 1, 1, "你好 from printer bridge") // "0" for a default font, "TSS24.BF2" for Simplified Chinese
 					.print(1);
 		},
 		handleMultiLineTextPrint(){
@@ -65,9 +65,9 @@ export default {
 					.gapMm(2.0, 0.0)
 					.cls()
 					.density(10)
-					.direction(0) // 0 is TSPLConst.DIRECTION_FORWARD
-					.text(10, 10, "TSS24.BF2", 0, 1, 1, "你好") // "0" for a default font, "TSS24.BF2" for Simplified Chinese
-					.text(10, 10+24, "TSS24.BF2", 0, 1, 1, "from printer bridge") // "0" for a default font, "TSS24.BF2" for Simplified Chinese
+					.direction(TSPLConst.DIRECTION.FORWARD)
+					.text(10, 10, TSPLConst.FONT.SIMPLIFIED_CHINESE, 0, 1, 1, "你好") // "0" for a default font, "TSS24.BF2" for Simplified Chinese
+					.text(10, 10+24, TSPLConst.FONT.SIMPLIFIED_CHINESE, 0, 1, 1, "from printer bridge") // "0" for a default font, "TSS24.BF2" for Simplified Chinese
 					.print(1);
 		}
 

@@ -1,10 +1,155 @@
+
+// TSPLConst.js
+// JavaScript constants mirroring the provided Java TSPLConst class
+
+const TSPLConst = {
+    BARCODE_TYPE: {
+        CODE_128: "128",        // Code 128
+        CODE_128M: "128M",      // Code 128 with Checksum
+        EAN128: "EAN128",       // EAN128 (also known as GS1-128)
+        CODE_25: "25",          // Code 25 (Interleaved 2 of 5)
+        CODE_25C: "25C",        // Code 25 with Checksum
+        CODE_39: "39",          // Code 39
+        CODE_39C: "39C",        // Code 39 with Checksum
+        CODE_93: "93",          // Code 93
+        EAN13: "EAN13",         // EAN13 (European Article Number)
+        EAN13_2: "EAN13+2",     // EAN13 with 2-digit add-on
+        EAN13_5: "EAN13+5",     // EAN13 with 5-digit add-on
+        EAN8: "EAN8",           // EAN8 (European Article Number)
+        EAN8_2: "EAN8+2",       // EAN8 with 2-digit add-on
+        EAN8_5: "EAN8+5",       // EAN8 with 5-digit add-on
+        CODA: "CODA",           // Codabar
+        POST: "POST",           // Postnet
+        UPCA: "UPCA",           // UPC-A (Universal Product Code)
+        UPCA_2: "UPCA+2",       // UPCA with 2-digit add-on
+        UPCA_5: "UPCA+5",       // UPCA with 5-digit add-on
+        UPCE: "UPCE",           // UPCE (compressed UPC-A)
+        UPCE_2: "UPCE+2",       // UPCE with 2-digit add-on
+        UPCE_5: "UPCE+5",       // UPCE with 5-digit add-on
+        CPOST: "CPOST",         // China Postal Code
+        MSI: "MSI",
+        MSIC: "MSIC",           // MSI with Checksum
+        PLESSEY: "PLESSEY",     // Plessey Code
+        ITF14: "ITF14",         // ITF-14 (Interleaved 2 of 5)
+        EAN14: "EAN14",         // EAN-14 (similar to ITF-14, often used for GTIN-14)
+        CODE_11: "11",          // Code 11
+        TELEPEN: "TELEPEN",     // Telepen Alpha
+        TELEPENN: "TELEPENN",   // Telepen Numeric
+        PLANET: "PLANET",       // Planet Code
+        CODE49: "CODE49",       // Code 49
+        DPI: "DPI",             // Deutsche Post Identcode
+        DPL: "DPL"              // Deutsche Post Leitcode
+    },
+    //todo: need to check if these are correct 
+    BARCODE_HUMAN_READABLE: {
+        NONE: 0,
+        DEFAULT_ALIGN: 1, // Typically 'Below' for linear. Corresponds to your READABLE_LEFT if it implies default.
+                          // If SDK has special alignment for human readable part:
+        ALIGN_LEFT: 1,    // As per your Java constants
+        ALIGN_CENTER: 2,
+        ALIGN_RIGHT: 3,
+
+        // Standard TSPL human readable options:
+        NONE_STANDARD: 0, // No human readable text
+        BELOW_STANDARD: 1,// Human readable text below barcode
+        ABOVE_STANDARD: 2 // Human readable text above barcode (not always supported)
+    },
+
+    ROTATION: {
+        ANGLE_0: 0,
+        ANGLE_90: 90,
+        ANGLE_180: 180,
+        ANGLE_270: 270
+    },
+
+    TEXT_ALIGNMENT: { // For TEXT command, if SDK supports alignment parameter directly
+                      // (Often alignment is done by calculating X position)
+        LEFT: 1,
+        CENTER: 2,
+        RIGHT: 3
+    },
+
+    DIRECTION: {
+        FORWARD: 0, // Normal printing direction
+        REVERSE: 1  // Content printed in reverse order
+    },
+
+    FONT: {
+        FNT_8_12: "1",    // Font 1 (typically 8x12 dots)
+        FNT_12_20: "2",   // Font 2 (typically 12x20 dots)
+        FNT_16_24: "3",   // Font 3 (typically 16x24 dots)
+        FNT_24_32: "4",   // Font 4 (typically 24x32 dots)
+        FNT_32_48: "5",   // Font 5 (typically 32x48 dots)
+        FNT_14_19: "6",   // Font 6
+        FNT_14_25: "7",   // Font 7 (some call this OCR-B)
+        FNT_21_27: "8",   // Font 8 (some call this OCR-A)
+        SIMPLIFIED_CHINESE: "TSS24.BF2", // Simplified Chinese font file
+        TRADITIONAL_CHINESE: "TST24.BF2",// Traditional Chinese font file
+        KOREAN: "K"       // Korean font identifier
+    },
+
+    QRCODE: {
+        ECC_LEVEL: { // Error Correction Code Level
+            L: "L", // Low (7%)
+            M: "M", // Medium (15%)
+            Q: "Q", // Quartile (25%)
+            H: "H"  // High (30%)
+        },
+        MODE: {
+            AUTO: "A",   // Automatic encoding
+            MANUAL: "M"  // Manual encoding (requires more parameters)
+        },
+        MODEL: { // For QR Code, typically Model 1 (original) or Model 2 (enhanced)
+            M1: "M1",
+            M2: "M2"
+        }
+    },
+
+    CODE_PAGE: { // International character sets / Code Pages
+        PAGE_437: 437,    // USA, Standard Europe
+        PAGE_850: 850,    // Multilingual
+        PAGE_852: 852,    // Latin 2 (Central Europe)
+        PAGE_860: 860,    // Portuguese
+        PAGE_863: 863,    // Canadian/French
+        PAGE_865: 865,    // Nordic
+        PAGE_1250: 1250,  // Windows Central Europe
+        PAGE_1252: 1252,  // Windows Latin 1 (ANSI)
+        PAGE_1253: 1253,  // Windows Greek
+        PAGE_1254: 1254   // Windows Turkish
+    },
+
+    BITMAP_MODE: { // For PUTBMP or BITMAP commands
+        OVERWRITE: 0,
+        OR: 1,
+        XOR: 2,
+        // Xinye SDK Java constants have _C versions, e.g., BMP_MODE_OVERWRITE_C.
+        // It's unclear what "_C" signifies without SDK context (Color? Compressed?).
+        // Assuming they are distinct modes:
+        OVERWRITE_C: 3,
+        OR_C: 4,
+        XOR_C: 5
+    },
+
+    STATUS: { // General status indicators
+        CONNECTED: 1,
+        DISCONNECTED: 0
+    }
+};
+
+// To make it available globally if not using modules:
+// window.TSPLConst = TSPLConst;
+
+// Or for ES6 modules, you would typically have this at the end of the file:
+// export default Object.freeze(TSPLConst); // Freezing makes it truly constant
+
+
 /**
- * JSPrinterBridge.js
  *
  * A JavaScript bridge to interact with a native TSPLPrinter.
  * Assumes a global object (e.g., `AndroidTSPLPrinter`) is injected by the native WebView
  * that exposes methods to call the Kotlin TSPLPrinter.
  */
+
 class JSPrinterBridge {
     constructor() {
         // `AndroidTSPLPrinter` is the object exposed by Android's addJavascriptInterface
@@ -122,28 +267,7 @@ class JSPrinterBridge {
         }
         return this; // Usually last, but still return for consistency
     }
-
-
-
-    // --- Potential alternative: Command Batching ---
-    // If making many individual native calls is too slow, you could batch them.
-    // This makes the JS slightly less of a direct mirror of the Kotlin chaining.
-
-    // _commandQueue = [];
-
-    // sizeMmWithQueue(widthMm, heightMm) {
-    //     this._commandQueue.push({ command: 'sizeMm', args: [widthMm, heightMm] });
-    //     return this;
-    // }
-    // ... other methods add to queue ...
-    //
-    // executeQueue() {
-    //     if (AndroidTSPLPrinter && AndroidTSPLPrinter.executeCommandQueue) {
-    //         AndroidTSPLPrinter.executeCommandQueue(JSON.stringify(this._commandQueue));
-    //         this._commandQueue = []; // Clear queue
-    //     }
-    //     return this;
-    // }
+ 
 }
 
 // Example Usage in JavaScript:
@@ -156,4 +280,4 @@ class JSPrinterBridge {
 //          .text(10, 10, "TSS24.BF2", 0, 1, 1, "你好，from printer bridge") // "0" for a default font, "TSS24.BF2" for Simplified Chinese
 //          .print(1);
 
-export default JSPrinterBridge; // Add this line to export the class as default
+export { JSPrinterBridge, TSPLConst };
