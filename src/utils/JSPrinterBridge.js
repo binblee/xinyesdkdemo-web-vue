@@ -201,11 +201,7 @@ class JSPrinterBridge {
      * @returns {JSPrinterBridge} this instance for chaining.
      */
     gapMm(feedMm, offsetMm) {
-        if (typeof AndroidTSPLPrinter !== 'undefined' && AndroidTSPLPrinter.gapMm) {
-            AndroidTSPLPrinter.gapMm(feedMm, offsetMm);
-        } else {
-            console.warn("JSPrinterBridge: gapMm called but native interface is not available or method is missing.");
-        }
+        this._callNative('gapMm', [feedMm, offsetMm]);
         return this;
     }
 
@@ -214,11 +210,7 @@ class JSPrinterBridge {
      * @returns {JSPrinterBridge} this instance for chaining.
      */
     cls() {
-        if (typeof AndroidTSPLPrinter !== 'undefined' && AndroidTSPLPrinter.cls) {
-            AndroidTSPLPrinter.cls();
-        } else {
-            console.warn("JSPrinterBridge: cls called but native interface is not available or method is missing.");
-        }
+        this._callNative('cls');
         return this;
     }
 
@@ -228,11 +220,7 @@ class JSPrinterBridge {
      * @returns {JSPrinterBridge} this instance for chaining.
      */
     density(level) {
-        if (typeof AndroidTSPLPrinter !== 'undefined' && AndroidTSPLPrinter.density) {
-            AndroidTSPLPrinter.density(level);
-        } else {
-            console.warn("JSPrinterBridge: density called but native interface is not available or method is missing.");
-        }
+        this._callNative('density', [level]);
         return this;
     }
 
@@ -244,11 +232,7 @@ class JSPrinterBridge {
      * @returns {JSPrinterBridge} this instance for chaining.
      */
     direction(directionValue) {
-        if (typeof AndroidTSPLPrinter !== 'undefined' && AndroidTSPLPrinter.direction) {
-            AndroidTSPLPrinter.direction(directionValue);
-        } else {
-            console.warn("JSPrinterBridge: direction called but native interface is not available or method is missing.");
-        }
+        this._callNative('direction', [directionValue]);
         return this;
     }
 
@@ -264,13 +248,7 @@ class JSPrinterBridge {
      * @returns {JSPrinterBridge} this instance for chaining.
      */
     text(x, y, fontIdentifier, rotation, xMultiplier, yMultiplier, content) {
-        if (typeof AndroidTSPLPrinter !== 'undefined' && AndroidTSPLPrinter.text) {
-            // Note: TSPLConst values for font need to be passed as their actual values
-            // e.g., if TSPLConst.FNT_8_12 is "1", pass "1".
-            AndroidTSPLPrinter.text(x, y, fontIdentifier, rotation, xMultiplier, yMultiplier, content);
-        } else {
-            console.warn("JSPrinterBridge: text called but native interface is not available or method is missing.");
-        }
+        this._callNative('text', [x, y, fontIdentifier, rotation, xMultiplier, yMultiplier, content]);
         return this;
     }
     
@@ -287,11 +265,7 @@ class JSPrinterBridge {
     barcode(
         x, y, codeType, height, content
     ) {
-        if (typeof AndroidTSPLPrinter !== 'undefined' && AndroidTSPLPrinter.text) {
-            AndroidTSPLPrinter.barcode(x, y, codeType, height, content);
-        } else {
-            console.warn("JSPrinterBridge: barcode called but native interface is not available or method is missing.");
-        }
+        this._callNative('barcode', [x, y, codeType, height, content]);
         return this;        
     }
 
@@ -301,12 +275,70 @@ class JSPrinterBridge {
      * @returns {JSPrinterBridge} this instance for chaining (though typically print is the last call).
      */
     print(quantity) {
-        if (typeof AndroidTSPLPrinter !== 'undefined' && AndroidTSPLPrinter.print) {
-            AndroidTSPLPrinter.print(quantity);
-        } else {
-            console.warn("JSPrinterBridge: print called but native interface is not available or method is missing.");
-        }
+        this._callNative('print', [quantity]);
         return this; // Usually last, but still return for consistency
+    }
+
+    /**
+     * Requests the printer status from the native interface.
+     * @param {number} [timeoutMs=7000] Optional timeout for the native call to get a response.
+     *                                   This is the timeout passed TO the native Android code.
+     * @returns {Promise<Object|string>} A promise that resolves with the printer status object
+     *                                   or rejects with an error object/message.
+     */
+    getPrinterStatus(timeoutMs = 7000) {
+        return new Promise((resolve, reject) => {
+            if (!this.isAvailable()) {
+                console.warn(`JSPrinterBridge: Native interface "${this.interfaceName}" not available for "getPrinterStatus".`);
+                // Reject with a specific error structure if desired
+                reject({ error: 'NativeInterfaceUnavailable', message: `Native interface "${this.interfaceName}" not available.` });
+                return;
+            }
+
+            const nativeInterface = window[this.interfaceName];
+            if (typeof nativeInterface.getPrinterStatus !== 'function') {
+                console.warn(`JSPrinterBridge: Native method "getPrinterStatus" is not available on "${this.interfaceName}".`);
+                reject({ error: 'NativeMethodUnavailable', message: `Native method "getPrinterStatus" is not available.` });
+                return;
+            }
+
+            // Create a unique callback name to avoid conflicts if multiple calls are made.
+            const callbackFunctionName = `_${this.interfaceName}_statusCallback_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+
+            // Define the callback function on the window object
+            window[callbackFunctionName] = (error, status) => {
+                // Clean up the global callback function once it's called
+                try {
+                    delete window[callbackFunctionName];
+                } catch (e) {
+                    // In some strict environments, deleting from window might fail or warn
+                    window[callbackFunctionName] = undefined;
+                }
+
+                if (error) {
+                    console.error('JSPrinterBridge: getPrinterStatus callback received error:', error);
+                    reject(error); // Error object directly from native code
+                } else {
+                    console.log('JSPrinterBridge: getPrinterStatus callback received status:', status);
+                    resolve(status); // Status object/string from native code
+                }
+            };
+
+            try {
+                // Call the native method, passing the name of our dynamically created callback
+                // and the user-provided timeout.
+                nativeInterface.getPrinterStatus(callbackFunctionName, timeoutMs);
+            } catch (e) {
+                console.error('JSPrinterBridge: Error invoking native getPrinterStatus:', e);
+                // Clean up callback if the immediate call throws
+                try {
+                    delete window[callbackFunctionName];
+                } catch (delErr) {
+                    window[callbackFunctionName] = undefined;
+                }
+                reject({ error: 'NativeCallFailed', message: `Error calling native getPrinterStatus: ${e.message}`, cause: e });
+            }
+        });
     }
  
 }

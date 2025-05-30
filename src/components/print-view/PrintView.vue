@@ -15,6 +15,12 @@
 			Print Barcode
 			<button @click="handleBarCodePrint('ty1234567890123')" class="action_btn">BARCODE</button>
 		</view>
+		<view style="display: flex; flex-direction: column; align-items: center; margin-top: 20px;">
+            Printer Status
+            <button @click="handleGetPrinterStatus" class="action_btn">Get Printer Status</button>
+            <view v-if="printerStatus">Status: {{ printerStatus }}</view>
+            <view v-if="statusError">Error: {{ statusError }}</view>
+        </view>
 	</view>
 </template>
 
@@ -28,6 +34,21 @@ import {
 import {TSPLConst, JSPrinterBridge} from '@/utils/JSPrinterBridge.js';
 
 export default {
+	data() {
+        return {
+            printerStatus: null,
+            statusError: null,
+            jsPrinter: null // To store the JSPrinterBridge instance
+        };
+    },
+	created() {
+        // Initialize the printer bridge when the component is created
+        this.jsPrinter = new JSPrinterBridge();
+        if (!this.jsPrinter.isAvailable()) {
+            console.warn("PrintView: Native printer interface not available on component creation.");
+            // You could set a data property here to inform the user
+        }
+    },
 	methods: {
 		handleShowNativeToast() {
 			showNativeToast('Hello from JavaScript in the web page!');
@@ -40,8 +61,7 @@ export default {
 			notifyActivity("User clicked a special button!");
 		},
 		handlePrintSampleTextFromJSPrinterBridge(){
-			const jsPrinter = new JSPrinterBridge();
-			jsPrinter.sizeMm(50.0, 15.0)
+			this.jsPrinter.sizeMm(50.0, 15.0)
 					.gapMm(2.0, 0.0)
 					.cls()
 					.density(10)
@@ -51,8 +71,7 @@ export default {
 		},
 		handleMultiLineTextPrint(){
 			// Print multi-line text example:
-			const jsPrinter = new JSPrinterBridge();
-			jsPrinter.sizeMm(50.0, 15.0)
+			this.jsPrinter.sizeMm(50.0, 15.0)
 					.gapMm(2.0, 0.0)
 					.cls()
 					.density(10)
@@ -62,8 +81,7 @@ export default {
 					.print(1);
 		},
 		handleBarCodePrint(content, quantity = 1 ) {
-			const jsPrinter = new JSPrinterBridge();
-			jsPrinter.sizeMm(50.0, 15.0)
+			this.jsPrinter.sizeMm(50.0, 15.0)
 					.gapMm(2.0, 0.0)
 					.cls()
 					.density(7)
@@ -71,6 +89,29 @@ export default {
 					.barcode(10, 10, TSPLConst.BARCODE_TYPE.CODE_128, 50, content)
 					.print(quantity);
 		},
+		async handleGetPrinterStatus() {
+            this.printerStatus = null; // Reset previous status
+            this.statusError = null;   // Reset previous error
+
+            if (!this.jsPrinter || !this.jsPrinter.isAvailable()) {
+                this.statusError = "Printer interface is not available.";
+                console.error("handleGetPrinterStatus: Printer interface not available.");
+                return;
+            }
+
+            console.log("Requesting printer status...");
+            try {
+                // Call getPrinterStatus, it returns a Promise
+                // You can pass an optional timeout in milliseconds
+                const status = await this.jsPrinter.getPrinterStatus(5000); // 5-second timeout for the native call
+
+                this.printerStatus = typeof status === 'object' ? JSON.stringify(status) : status;
+                console.log("Printer status received:", status);
+            } catch (error) {
+                this.statusError = typeof error === 'object' ? JSON.stringify(error) : error;
+                console.error("Failed to get printer status:", error);
+            }
+        }
 	}
 }
 </script>
