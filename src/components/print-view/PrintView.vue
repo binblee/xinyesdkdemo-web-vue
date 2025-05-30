@@ -1,26 +1,31 @@
 <template>
-	<view style="display: flex; flex-direction: column; align-items: center; justify-content: flex-start; height: 100vh;">
-		<view style="display: flex; flex-direction: column; align-items: center;">
-			Toasts
-			<button @click="handleShowNativeToast" class="action_btn">Show Android Toast</button>
-			<button @click="handleSendDataToNative" class="action_btn">Send Data to Android & Get Response</button>
-			<button @click="handleNotifyActivity" class="action_btn">Notify Activity</button>
+	<view class="container">
+		<view class="section">
+			<text class="section-title">Native Bridge Communication</text>
+			<button @click="handleShowNativeToast" class="action-btn">Show Android Toast</button>
+			<button @click="handleSendDataToNative" class="action-btn">Send Data & Get Response</button>
+			<button @click="handleNotifyActivity" class="action-btn">Notify Activity</button>
 		</view>
-		<view style="display: flex; flex-direction: column; align-items: center;">
-			Print Text
-			<button @click="handlePrintSampleTextFromJSPrinterBridge" class="action_btn">打印文字</button>
-			<button @click="handleMultiLineTextPrint" class="action_btn">多行文字打印</button>
+
+		<view class="section">
+			<text class="section-title">Text Printing</text>
+			<button @click="handlePrintSampleTextFromJSPrinterBridge" class="action-btn">Print Sample Text</button>
+			<button @click="handleMultiLineTextPrint" class="action-btn">Print Multi-line Text</button>
 		</view>
-		<view style="display: flex; flex-direction: column; align-items: center;">
-			Print Barcode
-			<button @click="handleBarCodePrint('ty1234567890123')" class="action_btn">BARCODE</button>
+
+		<view class="section">
+			<text class="section-title">Barcode Printing</text>
+			<button @click="handleBarCodePrint('ty1234567890123')" class="action-btn">Print Barcode</button>
 		</view>
-		<view style="display: flex; flex-direction: column; align-items: center; margin-top: 20px;">
-            Printer Status
-            <button @click="handleGetPrinterStatus" class="action_btn">Get Printer Status</button>
-            <view v-if="printerStatus">Status: {{ printerStatus }}</view>
-            <view v-if="statusError">Error: {{ statusError }}</view>
-        </view>
+
+		<view class="section">
+			<text class="section-title">Printer Status</text>
+			<button @click="handleGetPrinterStatus" class="action-btn">Get Printer Status</button>
+			<view v-if="printerStatus !== null || statusError !== null" class="status-display">
+				<text v-if="printerStatus" class="status-text success">Status: {{ printerStatus }}</text>
+				<text v-if="statusError" class="status-text error">Error: {{ statusError }}</text>
+			</view>
+		</view>
 	</view>
 </template>
 
@@ -117,22 +122,98 @@ export default {
 </script>
 
 <style>
-.action_btn {
-	background: rgb(69, 147, 228);
-	color: white;
-	border: none;
-	flex: 1;
-	margin-top: 40rpx;
-	margin-left: 20rpx;
-	margin-right: 20rpx;
-	font-size: 0.9rem;
+.container {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	padding: 20px;
+	font-family: sans-serif;
+	background-color: #f4f7f6; /* Light background for the whole page */
+	min-height: 100vh;
 }
 
-.action_btn_hover {
-	background: rgb(69, 147, 228);
+.section {
+	display: flex;
+	flex-direction: column;
+	align-items: stretch; /* Make buttons in a section have same width */
+	width: 100%;
+	max-width: 400px; /* Max width for content sections */
+	background-color: #ffffff; /* White background for sections */
+	padding: 20px;
+	margin-bottom: 20px;
+	border-radius: 8px;
+	box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+}
+
+.section-title {
+	font-size: 1.2rem;
+	font-weight: bold;
+	color: #333;
+	margin-bottom: 15px;
+	text-align: center;
+}
+
+.action-btn {
+	background-color: #007bff; /* A more modern blue */
 	color: white;
 	border: none;
-	flex: 1;
-	opacity: 0.7;
+	padding: 12px 15px;
+	margin-top: 10px;
+	border-radius: 5px;
+	font-size: 0.95rem;
+	text-align: center;
+	cursor: pointer;
+	transition: background-color 0.2s ease-in-out;
+}
+
+.action-btn:hover {
+	background-color: #0056b3; /* Darker blue on hover */
+}
+
+/* Specific hover class if needed, otherwise covered by .action-btn:hover */
+.action_btn_hover {
+	background-color: #0056b3;
+	opacity: 0.9;
+}
+
+.status-display {
+	margin-top: 15px;
+	padding: 10px;
+	border-radius: 5px;
+	width: 100%;
+	text-align: left;
+}
+
+.status-text {
+	display: block;
+	word-wrap: break-word;
+}
+
+.status-text.success {
+	color: #28a745; /* Green for success */
+	background-color: #e9f7ef; /* Light green background */
+	padding: 8px;
+	border-radius: 4px;
+}
+
+.status-text.error {
+	color: #dc3545; /* Red for error */
+	background-color: #fce8e6; /* Light red background */
+	padding: 8px;
+	border-radius: 4px;
+}
+
+/* Responsive adjustments if needed */
+@media (max-width: 600px) {
+	.container {
+		padding: 10px;
+	}
+	.section {
+		padding: 15px;
+	}
+	.action-btn {
+		font-size: 0.9rem;
+		padding: 10px 12px;
+	}
 }
 </style>
