@@ -145,10 +145,41 @@ const TSPLConst = {
 
 class JSPrinterBridge {
     constructor() {
-        // `AndroidTSPLPrinter` is the object exposed by Android's addJavascriptInterface
-        if (typeof AndroidTSPLPrinter === 'undefined') {
-            console.error("AndroidTSPLPrinter interface not found. Make sure it's exposed from native code.");
-            // You might want to throw an error or have a no-op mode
+        this.interfaceName = "AndroidTSPLPrinter"; // Name of the interface exposed by native code
+        this._isNativeAvailable = window[this.interfaceName] !== 'undefined';
+        if (!this._isNativeAvailable) {
+            console.warn(`JSPrinterBridge: Native interface "${this.interfaceName}" is not available on the window object. Printer functionality will be simulated or unavailable.`);
+        }
+    }
+    
+    /**
+     * Checks if the native printer interface is available.
+     * @returns {boolean} True if the native interface is detected, false otherwise.
+     */
+    isAvailable() {
+        return this._isNativeAvailable && window[this.interfaceName];
+    }
+
+    /**
+     * Internal helper to safely call a native method.
+     * @param {string} methodName The name of the method on the native interface.
+     * @param {any[]} args Arguments to pass to the native method.
+     * @param {string} [warningMessageIfMissing] Optional warning if the method is not found on the interface.
+     * @returns {boolean} True if the call was attempted (even if method missing but interface exists), false if native interface itself is missing.
+     */
+    _callNative(methodName, args = [], warningMessageIfMissing) {
+        if (!this.isAvailable()) {
+            console.warn(`JSPrinterBridge: Native interface "${this.interfaceName}" not available for calling "${methodName}".`);
+            return false;
+        }
+        const nativeInterface = window[this.interfaceName];
+        if (typeof nativeInterface[methodName] === 'function') {
+            nativeInterface[methodName](...args);
+            return true;
+        } else {
+            const message = warningMessageIfMissing || `JSPrinterBridge: Native method "${methodName}" is not available on "${this.interfaceName}".`;
+            console.warn(message);
+            return true; // Interface exists, but method is missing.
         }
     }
 
@@ -159,12 +190,8 @@ class JSPrinterBridge {
      * @returns {JSPrinterBridge} this instance for chaining.
      */
     sizeMm(widthMm, heightMm) {
-        if (typeof AndroidTSPLPrinter !== 'undefined' && AndroidTSPLPrinter.sizeMm) {
-            AndroidTSPLPrinter.sizeMm(widthMm, heightMm);
-        } else {
-            console.warn("JSPrinterBridge: sizeMm called but native interface is not available or method is missing.");
-        }
-        return this; // Enable chaining
+        this._callNative('sizeMm', [widthMm, heightMm]);
+        return this;
     }
 
     /**
