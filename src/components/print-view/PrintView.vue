@@ -21,7 +21,7 @@
 
 		<view class="section">
 			<text class="section-title">Bar & Box</text>
-			<button @click="handleBarAndBoxPrint()" class="action-btn">Print Bar & Box</button>
+			<button @click="handleBarAndBoxPrint" class="action-btn">Print Bar & Box</button>
 		</view>
 
 		<view class="section">
