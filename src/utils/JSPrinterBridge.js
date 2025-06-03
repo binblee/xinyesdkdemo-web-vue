@@ -280,9 +280,12 @@ class JSPrinterBridge {
      * @param {string} content The data to encode in the QR Code.
      * @returns {JSPrinterBridge} this instance for chaining.
      */
-    qrcode(x, y, content,
-        eccLevel = QRCODE.ECC_LEVEL.H, cellWidth = 4, 
-        mode = QRCODE.MODE.MANUAL, rotation = ROTATION.ANGLE_0) {
+    qrcode(x, y,
+        eccLevel = TSPLConst.QRCODE.ECC_LEVEL.H,
+        cellWidth = 4,
+        mode = TSPLConst.QRCODE.MODE.MANUAL,
+        rotation = TSPLConst.ROTATION.ANGLE_0,
+        content = '') {
 
         // Ensure parameters are in the exact order expected by the native Kotlin qrcode function
         this._callNative(
