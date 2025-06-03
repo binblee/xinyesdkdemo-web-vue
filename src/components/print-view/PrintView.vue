@@ -102,9 +102,9 @@ export default {
 					.density(7)
 					.direction(TSPLConst.DIRECTION.FORWARD)
 					.qrcode(10, 10,
-						TSPLConst.QRCODE.ECC_LEVEL.H,
+						TSPLConst.QRCODE_ECC_LEVEL.H,
 						4,
-						TSPLConst.QRCODE.MODE.MANUAL,
+						TSPLConst.QRCODE_MODE.MANUAL,
 						TSPLConst.ROTATION.ANGLE_0,
 						content)
 					.print(quantity);

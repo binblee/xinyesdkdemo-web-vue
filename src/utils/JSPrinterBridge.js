@@ -88,22 +88,22 @@ const TSPLConst = {
         KOREAN: "K"       // Korean font identifier
     },
 
-    QRCODE: {
-        ECC_LEVEL: { // Error Correction Code Level
-            L: "L", // Low (7%)
-            M: "M", // Medium (15%)
-            Q: "Q", // Quartile (25%)
-            H: "H"  // High (30%)
-        },
-        MODE: {
-            AUTO: "A",   // Automatic encoding
-            MANUAL: "M"  // Manual encoding (requires more parameters)
-        },
-        // MODEL: { // For QR Code, typically Model 1 (original) or Model 2 (enhanced)
-        //     M1: "M1",
-        //     M2: "M2"
-        // }
+    QRCODE_ECC_LEVEL: { // Error Correction Code Level
+        L: "L", // Low (7%)
+        M: "M", // Medium (15%)
+        Q: "Q", // Quartile (25%)
+        H: "H"  // High (30%)
     },
+
+    QRCODE_MODE: {
+        AUTO: "A",   // Automatic encoding
+        MANUAL: "M"  // Manual encoding (requires more parameters)
+    },
+
+    // QRCODE_MODEL: { // For QR Code, typically Model 1 (original) or Model 2 (enhanced)
+    //     M1: "M1",
+    //     M2: "M2"
+    // }
 
     // CODE_PAGE: { // International character sets / Code Pages
     //     PAGE_437: 437,    // USA, Standard Europe
@@ -118,17 +118,17 @@ const TSPLConst = {
     //     PAGE_1254: 1254   // Windows Turkish
     // },
 
-    BITMAP_MODE: { // For PUTBMP or BITMAP commands
-        OVERWRITE: 0,
-        OR: 1,
-        XOR: 2,
-        // Xinye SDK Java constants have _C versions, e.g., BMP_MODE_OVERWRITE_C.
-        // It's unclear what "_C" signifies without SDK context (Color? Compressed?).
-        // Assuming they are distinct modes:
-        OVERWRITE_C: 3,
-        OR_C: 4,
-        XOR_C: 5
-    },
+    // BITMAP_MODE: { // For PUTBMP or BITMAP commands
+    //     OVERWRITE: 0,
+    //     OR: 1,
+    //     XOR: 2,
+    //     // Xinye SDK Java constants have _C versions, e.g., BMP_MODE_OVERWRITE_C.
+    //     // It's unclear what "_C" signifies without SDK context (Color? Compressed?).
+    //     // Assuming they are distinct modes:
+    //     OVERWRITE_C: 3,
+    //     OR_C: 4,
+    //     XOR_C: 5
+    // },
 
     // STATUS: { // General status indicators
     //     CONNECTED: 1,
@@ -281,11 +281,11 @@ class JSPrinterBridge {
      * @returns {JSPrinterBridge} this instance for chaining.
      */
     qrcode(x, y,
-        eccLevel = TSPLConst.QRCODE.ECC_LEVEL.H,
-        cellWidth = 4,
-        mode = TSPLConst.QRCODE.MODE.MANUAL,
-        rotation = TSPLConst.ROTATION.ANGLE_0,
-        content = '') {
+        eccLevel,   // eg. TSPLConst.QRCODE_ECC_LEVEL.H,
+        cellWidth,  // eg. 4,
+        mode,       // eg. TSPLConst.QRCODE_MODE.MANUAL,
+        rotation,   // eg. TSPLConst.ROTATION.ANGLE_0,
+        content) {
 
         // Ensure parameters are in the exact order expected by the native Kotlin qrcode function
         this._callNative(
