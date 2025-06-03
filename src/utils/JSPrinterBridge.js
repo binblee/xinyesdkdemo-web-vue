@@ -42,17 +42,11 @@ const TSPLConst = {
     //todo: need to check if these are correct 
     BARCODE_HUMAN_READABLE: {
         NONE: 0,
-        DEFAULT_ALIGN: 1, // Typically 'Below' for linear. 
-                          // Corresponds to Xinye SDK's READABLE_LEFT 
-                          // if it implies default.
-        // ALIGN_LEFT: 1,    // As Xinye SDK Java constants
+        DEFAULT_ALIGN: 1,
+        ALIGN_LEFT: 1,
         // ALIGN_CENTER: 2,
         // ALIGN_RIGHT: 3,
 
-        // Standard TSPL human readable options:
-        // NONE_STANDARD: 0, // No human readable text
-        // BELOW_STANDARD: 1,// Human readable text below barcode
-        // ABOVE_STANDARD: 2 // Human readable text above barcode (not always supported)
     },
 
     ROTATION: {
@@ -61,13 +55,6 @@ const TSPLConst = {
         // ANGLE_180: 180,
         // ANGLE_270: 270
     },
-
-    // TEXT_ALIGNMENT: { // For TEXT command, if SDK supports alignment parameter directly
-    //                   // (Often alignment is done by calculating X position)
-    //     LEFT: 1,
-    //     CENTER: 2,
-    //     RIGHT: 3
-    // },
 
     DIRECTION: {
         FORWARD: 0, // Normal printing direction
@@ -99,41 +86,6 @@ const TSPLConst = {
         AUTO: "A",   // Automatic encoding
         MANUAL: "M"  // Manual encoding (requires more parameters)
     },
-
-    // QRCODE_MODEL: { // For QR Code, typically Model 1 (original) or Model 2 (enhanced)
-    //     M1: "M1",
-    //     M2: "M2"
-    // }
-
-    // CODE_PAGE: { // International character sets / Code Pages
-    //     PAGE_437: 437,    // USA, Standard Europe
-    //     PAGE_850: 850,    // Multilingual
-    //     PAGE_852: 852,    // Latin 2 (Central Europe)
-    //     PAGE_860: 860,    // Portuguese
-    //     PAGE_863: 863,    // Canadian/French
-    //     PAGE_865: 865,    // Nordic
-    //     PAGE_1250: 1250,  // Windows Central Europe
-    //     PAGE_1252: 1252,  // Windows Latin 1 (ANSI)
-    //     PAGE_1253: 1253,  // Windows Greek
-    //     PAGE_1254: 1254   // Windows Turkish
-    // },
-
-    // BITMAP_MODE: { // For PUTBMP or BITMAP commands
-    //     OVERWRITE: 0,
-    //     OR: 1,
-    //     XOR: 2,
-    //     // Xinye SDK Java constants have _C versions, e.g., BMP_MODE_OVERWRITE_C.
-    //     // It's unclear what "_C" signifies without SDK context (Color? Compressed?).
-    //     // Assuming they are distinct modes:
-    //     OVERWRITE_C: 3,
-    //     OR_C: 4,
-    //     XOR_C: 5
-    // },
-
-    // STATUS: { // General status indicators
-    //     CONNECTED: 1,
-    //     DISCONNECTED: 0
-    // }
 };
 
 /**
