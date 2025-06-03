@@ -16,7 +16,7 @@
 		<view class="section">
 			<text class="section-title">Barcode Printing</text>
 			<button @click="handleBarCodePrint('ty1234567890123')" class="action-btn">Print Barcode</button>
-			<button @click="handleQRCodePrint('https://www.taient.com/t_home')" class="action-btn">Print QR code</button>
+			<button @click="handleQRCodePrint('https://ibm.com')" class="action-btn">Print QR code</button>
 		</view>
 
 		<view class="section">
@@ -96,13 +96,13 @@ export default {
 					.print(quantity);
 		},
 		handleQRCodePrint(content, quantity = 1){
-			this.jsPrinter.sizeMm(50.0, 30.0)
+			this.jsPrinter.sizeMm(50.0, 15.0)
 					.gapMm(2.0, 0.0)
 					.cls()
 					.density(7)
 					.direction(TSPLConst.DIRECTION.FORWARD)
 					.qrcode(10, 10,
-						TSPLConst.QRCODE_ECC_LEVEL.H,
+						TSPLConst.QRCODE_ECC_LEVEL.M,
 						4,
 						TSPLConst.QRCODE_MODE.MANUAL,
 						TSPLConst.ROTATION.ANGLE_0,
