@@ -101,7 +101,7 @@ export default {
 					.cls()
 					.density(7)
 					.direction(TSPLConst.DIRECTION.FORWARD)
-					.qrcode(10, 10,
+					.qrcode(10, 5,
 						TSPLConst.QRCODE_ECC_LEVEL.M,
 						4,
 						TSPLConst.QRCODE_MODE.MANUAL,
