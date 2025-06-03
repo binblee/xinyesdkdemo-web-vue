@@ -121,7 +121,7 @@ export default {
 					.density(7)
 					.direction(TSPLConst.DIRECTION.FORWARD)
 					.bar(10, 10, 100, 20)
-					.box(5, 5, 110, 50, 2)
+					// .box(5, 5, 110, 50, 2)
 					.print();
 
 		},
