@@ -280,7 +280,7 @@ class JSPrinterBridge {
      * @param {string} content The data to encode in the QR Code.
      * @returns {JSPrinterBridge} this instance for chaining.
      */
-    qrcode(x, y, data, 
+    qrcode(x, y, content,
         eccLevel = QRCODE.ECC_LEVEL.H, cellWidth = 4, 
         mode = QRCODE.MODE.MANUAL, rotation = ROTATION.ANGLE_0) {
 

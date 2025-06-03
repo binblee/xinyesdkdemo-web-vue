@@ -16,7 +16,7 @@
 		<view class="section">
 			<text class="section-title">Barcode Printing</text>
 			<button @click="handleBarCodePrint('ty1234567890123')" class="action-btn">Print Barcode</button>
-			<button @click="handleBarCodePrint('https://www.taient.com/t_home')" class="action-btn">Print QR code</button>
+			<button @click="handleQRCodePrint('https://www.taient.com/t_home')" class="action-btn">Print QR code</button>
 		</view>
 
 		<view class="section">
