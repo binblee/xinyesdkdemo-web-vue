@@ -99,10 +99,10 @@ const TSPLConst = {
             AUTO: "A",   // Automatic encoding
             MANUAL: "M"  // Manual encoding (requires more parameters)
         },
-        MODEL: { // For QR Code, typically Model 1 (original) or Model 2 (enhanced)
-            M1: "M1",
-            M2: "M2"
-        }
+        // MODEL: { // For QR Code, typically Model 1 (original) or Model 2 (enhanced)
+        //     M1: "M1",
+        //     M2: "M2"
+        // }
     },
 
     // CODE_PAGE: { // International character sets / Code Pages
@@ -268,6 +268,30 @@ class JSPrinterBridge {
         this._callNative('barcode', [x, y, codeType, height, content]);
         return this;        
     }
+
+    /**
+     * Adds a QR Code to the label using the dedicated native qrcode interface.
+     * @param {number} x The X-coordinate for the top-left corner of the QR Code.
+     * @param {number} y The Y-coordinate for the top-left corner of the QR Code.
+     * @param {'L'|'M'|'Q'|'H'} Error Correction Level (defined in QRCODE.ECC_LEVEL).
+     * @param {number} The width of each module (dot) in the QR code (e.g., 2-10).
+     * @param {string} ['M'|'A'] QR code mode (e.g., "M" for Manual, "A" for Auto, defined in  QRCODE.MODE).
+     * @param {0|90|180|270} Rotation angle (0, 90, 180, 270, defined in ROTATION).
+     * @param {string} content The data to encode in the QR Code.
+     * @returns {JSPrinterBridge} this instance for chaining.
+     */
+    qrcode(x, y, data, 
+        eccLevel = QRCODE.ECC_LEVEL.H, cellWidth = 4, 
+        mode = QRCODE.MODE.MANUAL, rotation = ROTATION.ANGLE_0) {
+
+        // Ensure parameters are in the exact order expected by the native Kotlin qrcode function
+        this._callNative(
+            'qrcode', [x, y, eccLevel, cellWidth, mode, rotation, content],
+            `JSPrinterBridge: Native method "qrcode" is not available or has incorrect parameters.`
+        );
+        return this;
+    }
+
 
     /**
      * Executes the print job for a specified number of labels.
