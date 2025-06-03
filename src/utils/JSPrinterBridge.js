@@ -327,7 +327,7 @@ class JSPrinterBridge {
      * @param {number} quantity Number of labels to print.
      * @returns {JSPrinterBridge} this instance for chaining (though typically print is the last call).
      */
-    print(quantity) {
+    print(quantity = 1) {
         this._callNative('print', [quantity]);
         return this; // Usually last, but still return for consistency
     }
