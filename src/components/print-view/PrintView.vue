@@ -67,7 +67,7 @@ export default {
 			notifyActivity("User clicked a special button!");
 		},
 		handlePrintSampleTextFromJSPrinterBridge(){
-			this.jsPrinter.sizeMm(50.0, 15.0)
+			this.jsPrinter.sizeMm(50.0, 30.0)
 					.gapMm(2.0, 0.0)
 					.cls()
 					.density(10)
