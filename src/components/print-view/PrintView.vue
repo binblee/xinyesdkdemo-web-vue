@@ -20,6 +20,11 @@
 		</view>
 
 		<view class="section">
+			<text class="section-title">Bar & Box</text>
+			<button @click="handleBarAndBoxPrint()" class="action-btn">Print Bar & Box</button>
+		</view>
+
+		<view class="section">
 			<text class="section-title">Printer Status</text>
 			<button @click="handleGetPrinterStatus" class="action-btn">Get Printer Status</button>
 			<view v-if="printerStatus !== null || statusError !== null" class="status-display">
@@ -108,6 +113,17 @@ export default {
 						TSPLConst.ROTATION.ANGLE_0,
 						content)
 					.print(quantity);
+		},
+		handleBarAndBoxPrint(){
+			this.jsPrinter.sizeMm(50.0, 15.0)
+					.gapMm(2.0, 0.0)
+					.cls()
+					.density(7)
+					.direction(TSPLConst.DIRECTION.FORWARD)
+					.bar(10, 10, 100, 20)
+					.box(5, 5, 110, 50, 2)
+					.print();
+
 		},
 		async handleGetPrinterStatus() {
             this.printerStatus = null; // Reset previous status

@@ -251,6 +251,32 @@ class JSPrinterBridge {
         this._callNative('text', [x, y, fontIdentifier, rotation, xMultiplier, yMultiplier, content]);
         return this;
     }
+
+    /**
+     * Prints a solid bar (filled rectangle) on the label.
+     * @param x The X-coordinate (in dots) for the upper-left corner of the bar.
+     * @param y The Y-coordinate (in dots) for the upper-left corner of the bar.
+     * @param width The width of the bar (in dots).
+     * @param height The height of the bar (in dots).
+     */
+    bar(x, y, width, height){
+        this._callNative('bar', [x, y, width, height]);
+        return this;
+    }
+
+    /**
+     * Prints a box (rectangle outline) on the label.
+     *
+     * @param x The X-coordinate (in dots) for the upper-left corner of the box.
+     * @param y The Y-coordinate (in dots) for the upper-left corner of the box.
+     * @param width The width of the box (in dots).
+     * @param height The height of the box (in dots).
+     * @param thickness The line thickness of the box border (in dots).
+     */
+    box(x, y, width, height, thickness){
+        this._callNative('box', [x, y, width, height, thickness]);
+        return this;
+    }
     
     /**
      * Prints a barcode.
