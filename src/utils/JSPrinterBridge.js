@@ -39,7 +39,7 @@ const TSPLConst = {
         // DPI: "DPI",             // Deutsche Post Identcode
         // DPL: "DPL"              // Deutsche Post Leitcode
     },
-    //todo: need to check if these are correct 
+
     BARCODE_HUMAN_READABLE: {
         NONE: 0,
         DEFAULT_ALIGN: 1,
@@ -137,23 +137,26 @@ class JSPrinterBridge {
 
     /**
      * Sets the label size in millimeters.
-     * @param {number} widthMm Label width in mm.
-     * @param {number} heightMm Label height in mm.
+     * @param {number} width Label width in mm.
+     * @param {number} height Label height in mm.
      * @returns {JSPrinterBridge} this instance for chaining.
      */
-    sizeMm(widthMm, heightMm) {
-        this._callNative('sizeMm', [widthMm, heightMm]);
+    sizeMm(width, height) {
+        this._callNative('sizeMm', [width, height]);
         return this;
     }
 
     /**
-     * Sets the gap between labels in millimeters.
-     * @param {number} feedMm Gap feed distance in mm.
-     * @param {number} offsetMm Gap offset distance in mm.
+     * Sets the gap between label and feed area.
+     * All measurements are in millimeters (mm).
+     * @param {number} m The length of the gap between adjacent labels, in millimeters.
+     *          This value is used by the transmissive (gap) sensor for calibration.
+     * @param {number} n The feed offset for the gap, in millimeters. This value fine-tunes
+     *          the stopping position relative to the detected gap (often 0 mm).
      * @returns {JSPrinterBridge} this instance for chaining.
      */
-    gapMm(feedMm, offsetMm) {
-        this._callNative('gapMm', [feedMm, offsetMm]);
+    gapMm(m, n) {
+        this._callNative('gapMm', [m, n]);
         return this;
     }
 
@@ -178,9 +181,7 @@ class JSPrinterBridge {
 
     /**
      * Sets the print direction.
-     * @param {number} direction Use TSPLConst.DIRECTION_FORWARD or TSPLConst.DIRECTION_BACKWARD
-     *                         (You'll need to pass the numeric value from JS).
-     *                         Example: 0 for backward, 1 for forward. Consult your TSPLConst.
+     * @param {number} direction Use TSPLConst.DIRECTION_FORWARD = 0 or TSPLConst.DIRECTION_BACKWARD = 1
      * @returns {JSPrinterBridge} this instance for chaining.
      */
     direction(directionValue) {

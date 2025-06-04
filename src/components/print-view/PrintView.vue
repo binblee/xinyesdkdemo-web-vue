@@ -57,7 +57,6 @@ export default {
         this.jsPrinter = new JSPrinterBridge();
         if (!this.jsPrinter.isAvailable()) {
             console.warn("PrintView: Native printer interface not available on component creation.");
-            // You could set a data property here to inform the user
         }
     },
 	methods: {
@@ -81,7 +80,7 @@ export default {
 					.print(1);
 		},
 		handleMultiLineTextPrint(){
-			// Print multi-line text example:
+			// This prints two lines of text, one below the other
 			this.jsPrinter.sizeMm(50.0, 15.0)
 					.gapMm(2.0, 0.0)
 					.cls()
