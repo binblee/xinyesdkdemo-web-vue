@@ -2,62 +2,67 @@
   <div class="vrm-viewer-container">
     <!-- Avatar -->
     <div ref="canvasContainer" class="canvas-area"></div>
+
+    <!-- UI Panel for both TTS and Avatar Controls -->
+    <div class="ui-panel">
       <div class="chinese-tts-container">
-    <h2>Chinese Text-to-Speech</h2>
+        <!-- TTS -->
+        <div v-if="isLoadingVoices" class="loading-message">
+          Loading voices... Please wait.
+        </div>
 
-    <!-- TTS -->
-    <div v-if="isLoadingVoices" class="loading-message">
-      Loading voices... Please wait.
-    </div>
+        <div v-if="!isLoadingVoices && chineseVoices.length === 0" class="no-voices-message">
+          No Chinese voices were found on this device/browser.
+          Speech synthesis may not be available or supported for Chinese.
+        </div>
 
-    <div v-if="!isLoadingVoices && chineseVoices.length === 0" class="no-voices-message">
-      No Chinese voices were found on this device/browser.
-      Speech synthesis may not be available or supported for Chinese.
-    </div>
+        <div v-if="!isLoadingVoices && chineseVoices.length > 0" class="tts-controls">
+          <!-- Text to Speak Group (Row 1) -->
+          <div class="form-group">
+            <textarea id="textToSpeak" v-model="textToSpeak" rows="3" placeholder="Enter Chinese text here..."></textarea>
+          </div>
 
-    <div v-if="!isLoadingVoices && chineseVoices.length > 0" class="tts-controls">
-      <div class="form-group">
-        <label for="voiceSelect">Select Voice:</label>
-        <select id="voiceSelect" v-model="selectedVoiceURI" @change="handleVoiceSelection">
-          <option value="">-- Select a Chinese Voice --</option>
-          <option v-for="voice in chineseVoices" :key="voice.voiceURI || voice.name" :value="voice.voiceURI || voice.name">
-            {{ voice.name }} ({{ voice.lang }}) - [{{ voice.localService ? 'Local' : 'Network' }}]
-          </option>
-        </select>
+          <!-- Controls Row (Row 2) -->
+          <div class="tts-controls-row">
+            <div class="form-group voice-select-group">
+              <select id="voiceSelect" v-model="selectedVoiceURI" @change="handleVoiceSelection">
+                <option value="">-- Select a Chinese Voice --</option>
+                <option v-for="voice in chineseVoices" :key="voice.voiceURI || voice.name" :value="voice.voiceURI || voice.name">
+                  {{ voice.name }} ({{ voice.lang }}) - [{{ voice.localService ? 'Local' : 'Network' }}]
+                </option>
+              </select>
+            </div>
+
+            <div class="form-group speak-buttons-group">
+              <button @click="speak" :disabled="!selectedVoiceObject || !textToSpeak.trim() || isSpeaking">
+                {{ isSpeaking ? 'Speaking...' : 'Speak' }}
+              </button>
+              <button @click="cancelSpeech" v-if="isSpeaking" class="cancel-button">
+                Cancel
+              </button>
+            </div>
+          </div>
+
+          <!-- Error/Status Messages -->
+          <div v-if="speechError" class="error-message">
+            Error: {{ speechError }}
+          </div>
+          <div v-if="speechStatus" class="status-message">
+            Status: {{ speechStatus }}
+          </div>
+        </div>
       </div>
-
-      <div class="form-group">
-        <label for="textToSpeak">Text to Speak:</label>
-        <textarea id="textToSpeak" v-model="textToSpeak" rows="4" placeholder="Enter Chinese text here..."></textarea>
+      <!-- Controls -->
+      <div class="controls">
+        <button @click="setExpression('happy')">Happy</button>
+        <button @click="setExpression('angry')">Angry</button>
+        <button @click="setExpression('sad')">Sad</button>
+        <button @click="resetExpressions">Reset Expressions</button>
+        <button @click="putArmsDown">Arms Down</button>
+        <button @click="raiseLeftArmForward">Raise Left Arm</button>
+        <button @click="raiseRightArmForward">Raise Right Arm</button>
+        <button @click="resetArmPose">Reset Arms (T-Pose)</button>
       </div>
-
-      <div class="form-group">
-        <button @click="speak" :disabled="!selectedVoiceObject || !textToSpeak.trim() || isSpeaking">
-          {{ isSpeaking ? 'Speaking...' : 'Speak' }}
-        </button>
-        <button @click="cancelSpeech" v-if="isSpeaking" class="cancel-button">
-          Cancel
-        </button>
-      </div>
-
-      <div v-if="speechError" class="error-message">
-        Error: {{ speechError }}
-      </div>
-       <div v-if="speechStatus" class="status-message">
-        Status: {{ speechStatus }}
-      </div>
-    </div>
-    </div>
-    <!-- Controls -->
-    <div class="controls">
-      <button @click="setExpression('happy')">Happy</button>
-      <button @click="setExpression('angry')">Angry</button>
-      <button @click="setExpression('sad')">Sad</button>
-      <button @click="resetExpressions">Reset Expressions</button>
-      <button @click="putArmsDown">Arms Down</button>
-      <button @click="raiseLeftArmForward">Raise Left Arm</button>
-      <button @click="raiseRightArmForward">Raise Right Arm</button>
-      <button @click="resetArmPose">Reset Arms (T-Pose)</button>
     </div>
   </div>
 </template>
@@ -456,9 +461,86 @@ function raiseRightArmForward() {
   width: 100%;
   min-height: 0; /* Important for flex children */
   position: relative; /* If canvas inside needs absolute positioning */
+  overflow: hidden; /* ADDED: Prevent content from spilling out and overlapping siblings */
 }
 
-/* ADDED styles for controls - MODIFIED from previous */
+.ui-panel { /* ADDED: New panel for all UI controls */
+  flex-shrink: 0; /* Do not allow this panel to shrink */
+  overflow-y: auto; /* Allow vertical scrolling if content is too tall */
+  max-height: 50%; /* Limit the panel to 50% of parent's height (e.g., 250px if parent is 500px) */
+  /* background-color: #f0f0f0; */ /* Optional: for debugging */
+  padding: 10px; /* MODIFIED: Was 0 10px. Now 10px on all sides. */
+  box-sizing: border-box;
+}
+
+.chinese-tts-container {
+  font-family: sans-serif;
+  padding: 10px; /* Reduced padding */
+  border: 1px solid #ccc;
+  border-radius: 6px; /* Slightly reduced border-radius */
+  /* max-width: 450px; */ /* REMOVED to allow full width */
+  /* margin: 10px auto; */ /* REMOVED auto margin */
+  margin: 0 0 10px 0; /* MODIFIED: Was 10px 0. Removed top margin, kept 10px bottom margin. */
+  background-color: #f9f9f9;
+  width: 100%; /* ADDED: Make it full width of parent */
+  box-sizing: border-box; /* ADDED: Include padding and border in width */
+}
+
+.tts-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 8px; /* Spacing between rows */
+}
+
+.tts-controls-row {
+  display: flex;
+  gap: 10px; /* Spacing between voice select and buttons */
+  align-items: flex-end; /* Align items to the bottom */
+}
+
+.voice-select-group {
+  flex-grow: 1; /* Allow voice select to take more available space */
+}
+
+.speak-buttons-group {
+  display: flex;
+  flex-direction: column; /* Stack Speak and Cancel buttons */
+  gap: 5px; /* Space between Speak and Cancel buttons */
+  min-width: 100px; /* Ensure a minimum width for the button group */
+}
+
+.speak-buttons-group button {
+   width: 100%; /* Make buttons full width of their container */
+}
+
+.form-group {
+  margin-bottom: 0; /* Adjusted from 8px, gap on parent now handles spacing */
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 3px; /* Reduced margin */
+  font-weight: bold;
+  color: #555;
+  font-size: 0.9em; /* Reduced font size */
+}
+
+.form-group select,
+.form-group textarea,
+.form-group button {
+  width: 100%;
+  padding: 8px; /* Reduced padding */
+  border-radius: 3px; /* Reduced border-radius */
+  border: 1px solid #ddd;
+  box-sizing: border-box; /* Ensures padding doesn't affect width */
+  font-size: 0.9em; /* Reduced font size */
+}
+
+.form-group textarea {
+  resize: vertical;
+  min-height: 50px; /* Further reduced min-height for compactness with 3 rows */
+}
+
 .controls {
   background: #f8f9fa; /* Lighter, cleaner background */
   padding: 15px; /* Increased padding */
@@ -467,9 +549,12 @@ function raiseRightArmForward() {
   flex-wrap: wrap;
   gap: 10px; /* Increased gap for better spacing */
   justify-content: center; /* Center buttons if they don't fill the width */
-  flex-shrink: 0; 
+  flex-shrink: 0;
   border-top: 1px solid #dee2e6; /* Add a top border to separate from content above */
   box-shadow: 0 -2px 5px rgba(0,0,0,0.05); /* Subtle shadow to lift it a bit */
+  width: 100%; /* ADDED: Make it full width of parent */
+  box-sizing: border-box; /* ADDED: Include padding and border in width */
+  margin-top: 10px; /* Add some space above the controls if TTS is present */
 }
 
 .controls button {
@@ -492,47 +577,6 @@ function raiseRightArmForward() {
 .controls button:active {
   background-color: #004085; /* Even darker on active/click */
   box-shadow: 0 1px 2px rgba(0,0,0,0.1); /* Smaller shadow on active */
-}
-
-.chinese-tts-container {
-  font-family: sans-serif;
-  padding: 20px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  max-width: 500px;
-  margin: 20px auto;
-  background-color: #f9f9f9;
-}
-
-h2 {
-  text-align: center;
-  color: #333;
-}
-
-.form-group {
-  margin-bottom: 15px;
-}
-
-.form-group label {
-  display: block;
-  margin-bottom: 5px;
-  font-weight: bold;
-  color: #555;
-}
-
-.form-group select,
-.form-group textarea,
-.form-group button {
-  width: 100%;
-  padding: 10px;
-  border-radius: 4px;
-  border: 1px solid #ddd;
-  box-sizing: border-box; /* Ensures padding doesn't affect width */
-}
-
-.form-group textarea {
-  resize: vertical;
-  min-height: 80px;
 }
 
 .form-group button {
