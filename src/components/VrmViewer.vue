@@ -11,9 +11,11 @@
           Loading voices... Please wait.
         </div>
 
-        <div v-if="!isLoadingVoices && chineseVoices.length === 0" class="no-voices-message">
+        <div v-if="!isLoadingVoices && voices.length === 0" class="no-voices-message">
+          No TTS voices were found on this device/browser.
+        </div>
+        <div v-else-if="!isLoadingVoices && chineseVoices.length === 0" class="no-voices-message">
           No Chinese voices were found on this device/browser.
-          Speech synthesis may not be available or supported for Chinese.
         </div>
 
         <div v-if="!isLoadingVoices && chineseVoices.length > 0" class="tts-controls">
