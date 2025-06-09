@@ -1,19 +1,22 @@
 <script setup>
+import { ref } from 'vue'; // Added ref
 import HelloWorld from './components/HelloWorld.vue'
 import PrintView from './components/print-view/PrintView.vue'
+import VrmViewer from './components/VrmViewer.vue';
+import AppNavigator from './components/AppNavigator.vue'; // Import the new component
+
+const currentView = ref('vrm'); // Default to VrmViewer
+
+function handleNavigation(view) {
+  currentView.value = view;
+}
 </script>
 
 <template>
-  <!-- <div>
-    <a href="https://vite.dev" target="_blank">
-      <img src="/vite.svg" class="logo" alt="Vite logo" />
-    </a>
-    <a href="https://vuejs.org/" target="_blank">
-      <img src="./assets/vue.svg" class="logo vue" alt="Vue logo" />
-    </a>
-  </div> -->
-  <!-- <HelloWorld msg="Vite + Vue" />  -->
-  <PrintView />
+  <AppNavigator :currentView="currentView" @navigate="handleNavigation" />
+
+  <VrmViewer v-if="currentView === 'vrm'" />
+  <PrintView v-if="currentView === 'print'" />
 </template>
 
 <style scoped>
