@@ -3,59 +3,11 @@
     <!-- Avatar -->
     <div ref="canvasContainer" class="canvas-area"></div>
 
-    <!-- UI Panel for both TTS and Avatar Controls -->
+    <!-- UI Panel for Avatar Controls -->
     <div class="ui-panel">
-      <div class="chinese-tts-container">
-        <!-- TTS -->
-        <div v-if="isLoadingVoices" class="loading-message">
-          Loading voices... Please wait.
-        </div>
-
-        <div v-if="!isLoadingVoices && allVoices.length === 0" class="no-voices-message">
-          No TTS voices were found on this device/browser.
-        </div>
-        <div v-else-if="!isLoadingVoices && chineseVoices.length === 0" class="no-voices-message">
-          No Chinese voices were found on this device/browser.
-        </div>
-
-        <div v-if="!isLoadingVoices && chineseVoices.length > 0" class="tts-controls">
-          <!-- Text to Speak Group (Row 1) -->
-          <div class="form-group">
-            <textarea id="textToSpeak" v-model="textToSpeak" rows="3" placeholder="Enter Chinese text here..."></textarea>
-          </div>
-
-          <!-- Controls Row (Row 2) -->
-          <div class="tts-controls-row">
-            <div class="form-group voice-select-group">
-              <select id="voiceSelect" v-model="selectedVoiceURI" @change="handleVoiceSelection">
-                <option value="">-- Select a Chinese Voice --</option>
-                <option v-for="voice in chineseVoices" :key="voice.voiceURI || voice.name" :value="voice.voiceURI || voice.name">
-                  {{ voice.name }} ({{ voice.lang }}) - [{{ voice.localService ? 'Local' : 'Network' }}]
-                </option>
-              </select>
-            </div>
-
-            <div class="form-group speak-buttons-group">
-              <button @click="speak" :disabled="!selectedVoiceObject || !textToSpeak.trim() || isSpeaking">
-                {{ isSpeaking ? 'Speaking...' : 'Speak' }}
-              </button>
-              <button @click="cancelSpeech" v-if="isSpeaking" class="cancel-button">
-                Cancel
-              </button>
-            </div>
-          </div>
-
-          <!-- Error/Status Messages -->
-          <div v-if="speechError" class="error-message">
-            Error: {{ speechError }}
-          </div>
-          <div v-if="speechStatus" class="status-message">
-            Status: {{ speechStatus }}
-          </div>
-        </div>
-      </div>
       <!-- Controls -->
       <div class="controls">
+        <button @click="sayHello">Say Hello</button>
         <button @click="setExpression('happy')">Happy</button>
         <button @click="setExpression('angry')">Angry</button>
         <button @click="setExpression('sad')">Sad</button>
@@ -70,145 +22,17 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount, watch } from 'vue';
+import { ref, onMounted, onBeforeUnmount } from 'vue';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
-import { VRMLoaderPlugin, VRMUtils, VRMExpressionPresetName, VRMHumanBoneName } from '@pixiv/three-vrm'; // Added VRMHumanBoneName
+import { VRMLoaderPlugin, VRMUtils, VRMExpressionPresetName, VRMHumanBoneName } from '@pixiv/three-vrm';
 
 const canvasContainer = ref(null);
 let scene, camera, renderer, clock, currentVrm;
 
-// Chinese TTS related variables
-const allVoices = ref([]);
-const chineseVoices = ref([]);
-const selectedVoiceURI = ref(''); // Store URI or unique name
-const selectedVoiceObject = ref(null);
-const textToSpeak = ref('你好，请问我能帮你什么？'); // Default text in Chinese
-const isLoadingVoices = ref(true);
-const isSpeaking = ref(false);
-const speechError = ref('');
-const speechStatus = ref('');
-
-const synth = window.speechSynthesis;
-
-const populateVoiceList = () => {
-  if (!synth) {
-    isLoadingVoices.value = false;
-    speechError.value = "Speech Synthesis API not supported by this browser.";
-    console.error("Speech Synthesis API not supported.");
-    return;
-  }
-
-  const voices = synth.getVoices();
-  allVoices.value = voices;
-  console.log(`All available voices (total ${voices.length}):`, voices);
-
-  chineseVoices.value = voices.filter(voice =>
-    voice.lang.toLowerCase().startsWith('zh')
-  );
-  console.log(`Found Chinese voices (total ${chineseVoices.value.length}):`, chineseVoices.value);
-
-  isLoadingVoices.value = false;
-
-  // Auto-select the first Chinese voice if available and none is selected
-  if (chineseVoices.value.length > 0 && !selectedVoiceURI.value) {
-    const firstLocalChineseVoice = chineseVoices.value.find(v => v.localService);
-    if (firstLocalChineseVoice) {
-        selectedVoiceURI.value = firstLocalChineseVoice.voiceURI || firstLocalChineseVoice.name;
-    } else {
-        selectedVoiceURI.value = chineseVoices.value[0].voiceURI || chineseVoices.value[0].name;
-    }
-  }
-};
-
-const handleVoiceSelection = () => {
-  // This watcher will take care of updating selectedVoiceObject
-  // No explicit action needed here if selectedVoiceURI is properly bound.
-};
-
-watch(selectedVoiceURI, (newVal) => {
-  if (newVal) {
-    selectedVoiceObject.value = allVoices.value.find(
-      voice => (voice.voiceURI || voice.name) === newVal
-    );
-    console.log("Selected voice object:", selectedVoiceObject.value);
-  } else {
-    selectedVoiceObject.value = null;
-  }
-});
-
-const speak = () => {
-  if (!synth || !selectedVoiceObject.value || !textToSpeak.value.trim()) {
-    speechError.value = "Cannot speak. Check if a voice is selected and text is provided.";
-    console.error("Missing synth, selected voice, or text to speak.");
-    return;
-  }
-
-  if (isSpeaking.value) {
-    console.warn("Already speaking.");
-    return;
-  }
-
-  // Cancel any previous speech before starting a new one
-  if (synth.speaking || synth.pending) {
-    synth.cancel();
-  }
-
-  const utterance = new SpeechSynthesisUtterance(textToSpeak.value);
-  utterance.voice = selectedVoiceObject.value;
-  utterance.lang = selectedVoiceObject.value.lang; // Crucial for correct pronunciation
-  utterance.pitch = 1;
-  utterance.rate = 1;
-
-  utterance.onstart = () => {
-    isSpeaking.value = true;
-    speechStatus.value = `Speaking with: ${selectedVoiceObject.value?.name}...`;
-    speechError.value = '';
-    console.log("Speech started.");
-  };
-
-  utterance.onend = () => {
-    isSpeaking.value = false;
-    speechStatus.value = "Speech finished.";
-    console.log("Speech ended.");
-  };
-
-  utterance.onerror = (event) => {
-    isSpeaking.value = false;
-    speechError.value = `Speech error: ${event.error}`;
-    speechStatus.value = "Speech error occurred.";
-    console.error("Speech synthesis error:", event);
-  };
-
-  synth.speak(utterance);
-};
-
-const cancelSpeech = () => {
-  if (synth && isSpeaking.value) {
-    synth.cancel();
-    isSpeaking.value = false; // Manually reset as onend might not fire immediately
-    speechStatus.value = "Speech cancelled.";
-    console.log("Speech cancelled by user.");
-  }
-};
-
-
 onMounted(() => {
   initThree();
   loadDefaultVrmModel();
-  if (synth) {
-    // Attempt to load voices immediately
-    populateVoiceList();
-
-    // The 'voiceschanged' event is crucial because getVoices() might initially return an empty list
-    if (synth.onvoiceschanged !== undefined) {
-      synth.onvoiceschanged = populateVoiceList;
-    }
-  } else {
-     isLoadingVoices.value = false;
-     speechError.value = "Speech Synthesis API not supported by this browser.";
-     console.error("Speech Synthesis API not supported in onMounted.");
-  }
 });
 
 onBeforeUnmount(() => {
@@ -218,13 +42,6 @@ onBeforeUnmount(() => {
   }
   if (currentVrm) {
     VRMUtils.deepDispose(currentVrm.scene);
-  }
-  // Clean up: remove the event listener and cancel any ongoing speech
-  if (synth) {
-    synth.onvoiceschanged = null; // Remove the listener
-    if (synth.speaking) {
-      synth.cancel(); // Cancel any speech if the component is destroyed
-    }
   }
 });
 
@@ -338,6 +155,22 @@ async function loadDefaultVrmModel() {
   // Files in the public directory are served at the root path.
   const defaultVrmPath = 'https://taient.oss-cn-beijing.aliyuncs.com/vroid/AvatarZ.vrm';
   await loadVrm(defaultVrmPath);
+}
+
+function sayHello() { // ADDED FUNCTION
+  setExpression(VRMExpressionPresetName.Happy);
+  raiseRightArmForward();
+  // After a short delay, reset the arm to make it a brief wave
+  setTimeout(() => {
+    // Check if the arm is still raised before putting it down
+    // This is a simple check; a more robust solution might involve state tracking
+    const rightUpperArm = getBone(VRMHumanBoneName.RightUpperArm);
+    if (rightUpperArm && rightUpperArm.rotation.y === -Math.PI / 2) { 
+      putArmsDown(); // Or resetArmPose() if preferred
+    }
+    // Optionally reset expression too, or leave it as happy
+    // resetExpressions(); 
+  }, 1500); // Adjust delay as needed (1.5 seconds)
 }
 
 function setExpression(presetName, intensity = 1.0) {
@@ -455,7 +288,6 @@ function raiseRightArmForward() {
   flex-direction: column;
   width: 100%;
   height: 500px; /* Adjust as needed, or e.g., 100vh */
-  /* position: relative; Removed as it's not strictly needed for this layout */
 }
 
 .canvas-area { /* ADDED: Style for the canvas container */
@@ -469,173 +301,47 @@ function raiseRightArmForward() {
 .ui-panel { /* ADDED: New panel for all UI controls */
   flex-shrink: 0; /* Do not allow this panel to shrink */
   overflow-y: auto; /* Allow vertical scrolling if content is too tall */
-  max-height: 50%; /* Limit the panel to 50% of parent's height (e.g., 250px if parent is 500px) */
-  /* background-color: #f0f0f0; */ /* Optional: for debugging */
-  padding: 10px; /* MODIFIED: Was 0 10px. Now 10px on all sides. */
+  max-height: 50%; 
+  padding: 10px; 
   box-sizing: border-box;
 }
 
-.chinese-tts-container {
-  font-family: sans-serif;
-  padding: 10px; /* Reduced padding */
-  border: 1px solid #ccc;
-  border-radius: 6px; /* Slightly reduced border-radius */
-  /* max-width: 450px; */ /* REMOVED to allow full width */
-  /* margin: 10px auto; */ /* REMOVED auto margin */
-  margin: 0 0 10px 0; /* MODIFIED: Was 10px 0. Removed top margin, kept 10px bottom margin. */
-  background-color: #f9f9f9;
-  width: 100%; /* ADDED: Make it full width of parent */
-  box-sizing: border-box; /* ADDED: Include padding and border in width */
-}
-
-.tts-controls {
-  display: flex;
-  flex-direction: column;
-  gap: 8px; /* Spacing between rows */
-}
-
-.tts-controls-row {
-  display: flex;
-  gap: 10px; /* Spacing between voice select and buttons */
-  align-items: flex-end; /* Align items to the bottom */
-}
-
-.voice-select-group {
-  flex-grow: 1; /* Allow voice select to take more available space */
-}
-
-.speak-buttons-group {
-  display: flex;
-  flex-direction: column; /* Stack Speak and Cancel buttons */
-  gap: 5px; /* Space between Speak and Cancel buttons */
-  min-width: 100px; /* Ensure a minimum width for the button group */
-}
-
-.speak-buttons-group button {
-   width: 100%; /* Make buttons full width of their container */
-}
-
-.form-group {
-  margin-bottom: 0; /* Adjusted from 8px, gap on parent now handles spacing */
-}
-
-.form-group label {
-  display: block;
-  margin-bottom: 3px; /* Reduced margin */
-  font-weight: bold;
-  color: #555;
-  font-size: 0.9em; /* Reduced font size */
-}
-
-.form-group select,
-.form-group textarea,
-.form-group button {
-  width: 100%;
-  padding: 8px; /* Reduced padding */
-  border-radius: 3px; /* Reduced border-radius */
-  border: 1px solid #ddd;
-  box-sizing: border-box; /* Ensures padding doesn't affect width */
-  font-size: 0.9em; /* Reduced font size */
-}
-
-.form-group textarea {
-  resize: vertical;
-  min-height: 50px; /* Further reduced min-height for compactness with 3 rows */
-}
-
 .controls {
-  background: #f8f9fa; /* Lighter, cleaner background */
-  padding: 15px; /* Increased padding */
-  border-radius: 8px; /* Slightly larger radius */
+  background: #f8f9fa;
+  padding: 15px;
+  border-radius: 8px;
   display: flex;
   flex-wrap: wrap;
-  gap: 10px; /* Increased gap for better spacing */
-  justify-content: center; /* Center buttons if they don't fill the width */
+  gap: 10px;
+  justify-content: center;
   flex-shrink: 0;
-  border-top: 1px solid #dee2e6; /* Add a top border to separate from content above */
-  box-shadow: 0 -2px 5px rgba(0,0,0,0.05); /* Subtle shadow to lift it a bit */
-  width: 100%; /* ADDED: Make it full width of parent */
-  box-sizing: border-box; /* ADDED: Include padding and border in width */
-  margin-top: 10px; /* Add some space above the controls if TTS is present */
+  border-top: 1px solid #dee2e6;
+  box-shadow: 0 -2px 5px rgba(0,0,0,0.05);
+  width: 100%;
+  box-sizing: border-box;
+  /* margin-top: 10px; */ /* Removed as TTS container is gone, direct child of ui-panel now */
 }
 
 .controls button {
-  padding: 8px 15px; /* More balanced padding */
+  padding: 8px 15px;
   font-size: 14px;
   color: #fff;
-  background-color: #007bff; /* Primary button color */
-  border: none; /* Remove default border */
+  background-color: #007bff;
+  border: none;
   border-radius: 5px;
   cursor: pointer;
   transition: background-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* Subtle shadow for buttons */
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .controls button:hover {
-  background-color: #0056b3; /* Darker on hover */
-  box-shadow: 0 4px 8px rgba(0,0,0,0.15); /* Slightly larger shadow on hover */
+  background-color: #0056b3;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
 }
 
 .controls button:active {
-  background-color: #004085; /* Even darker on active/click */
-  box-shadow: 0 1px 2px rgba(0,0,0,0.1); /* Smaller shadow on active */
-}
-
-.form-group button {
-  background-color: #007bff;
-  color: white;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.form-group button:hover:not(:disabled) {
-  background-color: #0056b3;
-}
-
-.form-group button:disabled {
-  background-color: #cccccc;
-  cursor: not-allowed;
-}
-
-.cancel-button {
-  background-color: #dc3545 !important; /* Important to override general button style */
-  margin-top: 5px;
-}
-.cancel-button:hover:not(:disabled) {
-  background-color: #c82333 !important;
-}
-
-.loading-message,
-.no-voices-message,
-.error-message,
-.status-message {
-  padding: 10px;
-  margin-top: 10px;
-  border-radius: 4px;
-  text-align: center;
-}
-
-.loading-message {
-  background-color: #e0e0e0;
-  color: #333;
-}
-
-.no-voices-message {
-  background-color: #ffe0b2; /* Light orange */
-  color: #856404;
-  border: 1px solid #ffc107;
-}
-
-.error-message {
-  background-color: #f8d7da; /* Light red */
-  color: #721c24;
-  border: 1px solid #f5c6cb;
-}
-
-.status-message {
-  background-color: #d4edda; /* Light green */
-  color: #155724;
-  border: 1px solid #c3e6cb;
+  background-color: #004085;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
 }
 
 </style>

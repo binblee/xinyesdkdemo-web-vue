@@ -1,22 +1,29 @@
 <script setup>
-import { ref } from 'vue'; // Added ref
-import HelloWorld from './components/HelloWorld.vue'
-import PrintView from './components/print-view/PrintView.vue'
-import VrmViewer from './components/VrmViewer.vue';
-import AppNavigator from './components/AppNavigator.vue'; // Import the new component
+import { ref } from 'vue';
+import AppNavigator from './components/AppNavigator.vue';
+import ViewManager from './components/ViewManager.vue';
 
-const currentView = ref('vrm'); // Default to VrmViewer
+const activeComponent = ref('AppNavigator'); // Can be 'AppNavigator', 'VrmViewer', 'PrintView'
+const currentViewForManager = ref(''); // To pass to ViewManager, e.g., 'vrm' or 'print'
 
 function handleNavigation(view) {
-  currentView.value = view;
+  currentViewForManager.value = view; // e.g., 'vrm' or 'print'
+  activeComponent.value = 'ViewManager'; // Switch to showing ViewManager
+}
+
+function handleGoBack() {
+  activeComponent.value = 'AppNavigator'; // Switch back to showing AppNavigator
+  currentViewForManager.value = ''; // Reset the view for manager
 }
 </script>
 
 <template>
-  <AppNavigator :currentView="currentView" @navigate="handleNavigation" />
-
-  <VrmViewer v-if="currentView === 'vrm'" />
-  <PrintView v-if="currentView === 'print'" />
+  <AppNavigator v-if="activeComponent === 'AppNavigator'" @navigate="handleNavigation" />
+  <ViewManager 
+    v-if="activeComponent === 'ViewManager'" 
+    :currentView="currentViewForManager" 
+    @goBack="handleGoBack" 
+  />
 </template>
 
 <style scoped>
