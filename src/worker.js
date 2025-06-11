@@ -13,11 +13,20 @@ export default {
 
     // Use the correct binding for static assets, which appears to be __STATIC_CONTENT
     if (env.__STATIC_CONTENT) {
+      console.log("Type of env.__STATIC_CONTENT:", typeof env.__STATIC_CONTENT);
+      if (typeof env.__STATIC_CONTENT === 'object' && env.__STATIC_CONTENT !== null) {
+        console.log("Keys of env.__STATIC_CONTENT:", Object.keys(env.__STATIC_CONTENT).join(', '));
+      }
       try {
+        // Assuming it should have a fetch method, though the error suggests otherwise.
+        // This line will likely error again, but the logs above will be helpful.
         return await env.__STATIC_CONTENT.fetch(request);
       } catch (e) {
         // Log the error and return a generic error response
-        console.error(`Error fetching from env.__STATIC_CONTENT: ${e}`);
+        console.error(`Error interacting with env.__STATIC_CONTENT: ${e}`);
+        if (e instanceof TypeError && e.message.includes("is not a function")) {
+            return new Response(`Static asset serving misconfigured: env.__STATIC_CONTENT does not have a fetch method. Type: ${typeof env.__STATIC_CONTENT}`, { status: 500 });
+        }
         return new Response('Error serving static asset.', { status: 500 });
       }
     } else {
