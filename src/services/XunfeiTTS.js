@@ -41,17 +41,18 @@ export function getVoiceList() {
 // 文本转语音
 export async function textToSpeech(text, params = {}, useProxy = true) {
   try {
-    const authStr = getAuthString('GET', '/v2/tts');
     let wsUrl;
 
     if (useProxy) {
-      // Fetch the WebSocket URL from the backend proxy
-      const proxyUrl = `/api/xunfei/tts-ws-url?authStr=${encodeURIComponent(authStr)}`;
+      // Fetch the WebSocket URL from the backend proxy.
+      // The proxy will now generate the full signed URL.
+      const proxyUrl = `/api/xunfei/tts-ws-url`; // No authStr needed from client
       const response = await axios.get(proxyUrl);
       wsUrl = response.data.wsUrl;
     } else {
       // Construct WebSocket URL directly (for scenarios where proxy is not used/needed)
-      // Ensure config.ttsUrl is the base wss URL without query parameters
+      // THIS PATH REMAINS A SECURITY RISK FOR API_SECRET if config.apiSecret is exposed client-side
+      const authStr = getAuthString('GET', '/v2/tts'); // Client generates authStr
       wsUrl = `${config.ttsUrl}?${authStr}`;
     }
 
