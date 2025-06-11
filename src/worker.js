@@ -11,19 +11,19 @@ export default {
       return handleXunfeiTtsRequest(request, env);
     }
 
-    // Check if env.ASSETS is available before attempting to use it
-    if (env.ASSETS) {
+    // Use the correct binding for static assets, which appears to be __STATIC_CONTENT
+    if (env.__STATIC_CONTENT) {
       try {
-        return await env.ASSETS.fetch(request);
+        return await env.__STATIC_CONTENT.fetch(request);
       } catch (e) {
         // Log the error and return a generic error response
-        console.error(`Error fetching from env.ASSETS: ${e}`);
+        console.error(`Error fetching from env.__STATIC_CONTENT: ${e}`);
         return new Response('Error serving static asset.', { status: 500 });
       }
     } else {
-      // Log an error or return a specific response if ASSETS binding is missing
-      console.error("env.ASSETS binding is undefined. Check [site] configuration in wrangler.toml and deployment process.");
-      return new Response("Static asset serving is not configured correctly. env.ASSETS is undefined.", { status: 500 });
+      // This block should ideally not be reached if __STATIC_CONTENT is the correct binding
+      console.error("env.__STATIC_CONTENT binding is undefined. This is unexpected.");
+      return new Response("Static asset serving is not configured correctly. env.__STATIC_CONTENT is undefined.", { status: 500 });
     }
   },
 };
