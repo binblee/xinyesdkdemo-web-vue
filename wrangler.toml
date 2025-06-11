@@ -1,0 +1,25 @@
+name = "xinyesdkdemo-web-vue" # Replace with your desired worker name
+main = "src/worker.js" # Entry point for your Worker
+compatibility_date = "2024-06-11" # Update with a recent date
+
+# Configuration for serving static assets (your Vite/Vue app)
+[site]
+bucket = "./dist" # Directory where your `vite build` output is located
+
+# Environment variables (secrets should be set in Cloudflare dashboard)
+# These will be available in your worker script via the `env` object in the fetch handler.
+# Example:
+# [vars]
+# VITE_XUNFEI_APP_ID = "your_app_id_here" # This is used client-side, but can be here for consistency if worker needs it
+
+# To use secrets (recommended for API keys):
+# 1. Add them in the Cloudflare Dashboard: Workers & Pages > your_worker > Settings > Variables > Environment Variables (add as Secret text)
+# 2. They will be available in `env.YOUR_SECRET_NAME`
+# Example (these names must match what your code expects, e.g., env.VITE_XUNFEI_API_KEY):
+# VITE_XUNFEI_API_KEY = "your_api_key_secret_from_cloudflare_dashboard"
+# VITE_XUNFEI_API_SECRET = "your_api_secret_secret_from_cloudflare_dashboard"
+
+# If you have build steps for the worker itself (e.g., TypeScript, wasm)
+# [build]
+# command = "npm run build:worker" # Example if you had a specific worker build step
+# watch_dir = "src/worker-handlers" # Example
