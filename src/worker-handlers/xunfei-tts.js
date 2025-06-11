@@ -16,9 +16,17 @@ export async function handleXunfeiTtsRequest(request, env) {
   // Access your secrets stored in Cloudflare Worker environment variables
   const apiKey = env.VITE_XUNFEI_API_KEY;
   const apiSecret = env.VITE_XUNFEI_API_SECRET;
+  const appId = env.VITE_XUNFEI_APP_ID;
 
-  if (!apiKey || !apiSecret) {
-    return new Response(JSON.stringify({ error: 'API credentials not configured on server.' }), {
+  if (!apiKey || !apiSecret || !appId) {
+    return new Response(JSON.stringify({ 
+      error: 'API credentials not configured on server.',
+      missing: {
+        apiKey: !apiKey,
+        apiSecret: !apiSecret,
+        appId: !appId
+      }
+    }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' },
     });
@@ -28,7 +36,7 @@ export async function handleXunfeiTtsRequest(request, env) {
   const authStr = getAuthStringFromServer('GET', '/v2/tts', apiKey, apiSecret);
   const wsUrl = `wss://tts-api.xfyun.cn/v2/tts?${authStr}`;
 
-  return new Response(JSON.stringify({ wsUrl }), {
+  return new Response(JSON.stringify({ wsUrl, appId }), {
     headers: { 'Content-Type': 'application/json' },
   });
 }

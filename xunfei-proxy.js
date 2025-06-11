@@ -36,10 +36,18 @@ app.get('/api/xunfei/tts-ws-url', (req, res) => {
   // Generate authStr on the server-side using environment variables
   const apiKey = process.env.VITE_XUNFEI_API_KEY;
   const apiSecret = process.env.VITE_XUNFEI_API_SECRET;
+  const appId = process.env.VITE_XUNFEI_APP_ID;
 
-  if (!apiKey || !apiSecret) {
+  if (!apiKey || !apiSecret || !appId) {
     console.error('Missing API credentials in .env for local proxy');
-    return res.status(500).json({ error: 'API credentials not configured on server.' });
+    return res.status(500).json({ 
+      error: 'API credentials not configured on server.',
+      missing: {
+        apiKey: !apiKey,
+        apiSecret: !apiSecret,
+        appId: !appId
+      }
+    });
   }
 
   // Re-implement or import getAuthString logic here for the local proxy
@@ -54,7 +62,7 @@ app.get('/api/xunfei/tts-ws-url', (req, res) => {
   
   const authStr = `authorization=${authorization}&date=${date}&host=${host}`;
   const wsUrl = `wss://tts-api.xfyun.cn/v2/tts?${authStr}`;
-  res.json({ wsUrl });
+  res.json({ wsUrl, appId });
 });
 
 const PORT = process.env.PORT || 3001;

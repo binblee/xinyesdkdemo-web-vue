@@ -40,6 +40,7 @@ export function getVoiceList() {
 export async function textToSpeech(text, params = {}, useProxy = true) {
   try {
     let wsUrl;
+    let appId;
 
     if (useProxy) {
       // Fetch the WebSocket URL from the backend proxy.
@@ -47,15 +48,21 @@ export async function textToSpeech(text, params = {}, useProxy = true) {
       const proxyUrl = `/api/xunfei/tts-ws-url`; // Do NOT send client-generated authStr
       const response = await axios.get(proxyUrl);
       wsUrl = response.data.wsUrl;
+      appId = response.data.appId; // Get the APP ID from the server response
     } else {
       // Construct WebSocket URL directly (for scenarios where proxy is not used/needed)
       // THIS PATH REMAINS A SECURITY RISK FOR API_SECRET if config.apiSecret is exposed client-side
       const authStr = getAuthString('GET', '/v2/tts'); // Client generates authStr
       wsUrl = `${config.ttsUrl}?${authStr}`;
+      appId = config.appId; // Use the client-side config
     }
 
     if (!wsUrl) {
       throw new Error('Failed to get WebSocket URL');
+    }
+
+    if (!appId) {
+      throw new Error('APP ID is required but not provided by server');
     }
 
     return new Promise((resolve, reject) => {
@@ -64,7 +71,7 @@ export async function textToSpeech(text, params = {}, useProxy = true) {
 
       ws.onopen = () => {
         const frame = {
-          common: { app_id: config.appId },
+          common: { app_id: appId }, // Use the APP ID from server response
           business: {
             aue: 'lame', // audio encoding
             sfl: 1,      // stream flag
