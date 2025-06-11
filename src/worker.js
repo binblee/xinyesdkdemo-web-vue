@@ -2,6 +2,8 @@ import { handleXunfeiTtsRequest } from './worker-handlers/xunfei-tts';
 
 export default {
   async fetch(request, env, ctx) {
+    console.log("Worker received request. Available env keys:", Object.keys(env).join(', '));
+
     const url = new URL(request.url);
 
     // Handle API requests
