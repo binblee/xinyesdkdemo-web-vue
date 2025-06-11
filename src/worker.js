@@ -4,8 +4,6 @@ import manifestJSON from '__STATIC_CONTENT_MANIFEST';
 
 export default {
   async fetch(request, env, ctx) {
-    console.log("Worker received request. URL:", request.url, "Available env keys:", Object.keys(env).join(', '));
-
     const url = new URL(request.url);
 
     // Handle API requests
