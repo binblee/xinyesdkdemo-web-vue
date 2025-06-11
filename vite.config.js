@@ -14,6 +14,13 @@ export default defineConfig({
   },
   server: {
     host: '0.0.0.0',
-    port: port
+    port: port,
+    proxy: { // Added proxy configuration
+      '/api': {
+        target: 'http://localhost:3001', // Your proxy server
+        changeOrigin: true,
+        // rewrite: (path) => path.replace(/^\/api/, '') // Uncomment if your proxy doesn't expect /api prefix
+      }
+    }
   }
 })

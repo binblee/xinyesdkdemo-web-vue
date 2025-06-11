@@ -2,14 +2,40 @@
 
 ## 项目简介
 
-本项目是一个基于 Vue 的 Web 演示项目，主要用于演示新烨打印 SDK 的集成与使用方法。
+本项目配合安卓Webview演示如下内容：
+
+- 芯烨打印 SDK 的集成与使用方法。
+- Roid数字人显示与动作、表情控制
+- 讯飞TTS语音合成
 
 ## 目录结构
 
-- `src/utils/JSPrinterBridge.js`：封装与新烨打印 SDK 的 JS 桥接方法。
-- `src/components/print-view/PrintView.vue`：打印功能的示例页面。
+导航页面：
+- `src/components/AppNavigator.vue`
+- `src/components/ViewManager.vue`
 
-## JSPrinterBridge.js 说明
+芯烨打印机：
+- `src/utils/JSPrinterBridge.js`：封装与新烨打印 SDK 的 JS 桥接方法。
+- `src/components/PrintView.vue`：打印功能的示例页面。
+
+VRoid数字人：
+- `src/components/VrmViewer.vue`：数字人演示页面
+-  [https://taient.oss-cn-beijing.aliyuncs.com/vroid/AvatarZ.vrm](https://taient.oss-cn-beijing.aliyuncs.com/vroid/AvatarZ.vrm) ： 数字人模型（VRM格式），用在VrmViewer中。
+- [https://taient.oss-cn-beijing.aliyuncs.com/vroid/model-avatarz.xroid](https://taient.oss-cn-beijing.aliyuncs.com/vroid/model-avatarz.xroid) ：VRoid Studio项目文件，用于编辑数字人并到处VRM模型。
+
+- [https://vroid.com/en/studio](https://vroid.com/en/studio) ：VRoid Studio 官网。
+
+讯飞TTS：
+- `src/services/XunfeiTTS.js`：封装讯飞TTS API调用细节
+- `src/components/XunfeiTtsDemo.vue`：讯飞TTS演示页面
+- `xunfei-proxy.js`：后端Proxy，如果讯飞对Web API调用CORS限制，可以使用这个proxy
+
+
+## 打印机SDK集成
+
+通过自定义Javascript Bridge将安卓平台上的打印机SDK功能开放给WebView中的Javascript。只有常用的几个打印功能定义了JSBridge，详见JSPrinterBridge.js文件。
+
+### JSPrinterBridge.js 说明
 
 `JSPrinterBridge.js` 文件用于封装与新烨打印 SDK 的交互逻辑，提供统一的 JS 接口，方便在 Vue 组件中调用。
 
@@ -37,7 +63,22 @@ this.jsPrinter.sizeMm(50.0, 15.0)
 const status = await this.jsPrinter.getPrinterStatus(5000);
 ```
 
-## PrintView.vue 示例代码
+## VRoid数字人
 
-在 `PrintView.vue` 组件中演示了调用 JSPrinterBridge 进行打印。
+TBD
+
+## 讯飞TTS
+
+目前使用免费的账号，实测只能说很短的句子，选择有限的几个发音人（音库）。
+
+讯飞TTS对于websocket调用没有CORS限制。调用textToSpeech()参数`useProxy`设置为`false`即可。
+
+如果希望使用proxy，则需要在另外的窗口启动proxy：
+
+```bash
+node xunfei-proxy.js
+```
+
+proxy侦听在3001端口，vite-config.js中已配置好。
+
 

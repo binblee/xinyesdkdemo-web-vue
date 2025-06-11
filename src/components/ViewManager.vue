@@ -3,12 +3,14 @@
     <button @click="goBackToNavigator" class="back-button">Back</button>
     <VrmViewer v-if="currentView === 'vrm'" />
     <PrintView v-if="currentView === 'print'" />
+    <XunfeiTtsDemo v-if="currentView === 'tts'" />
   </div>
 </template>
 
 <script setup>
 import PrintView from './PrintView.vue'
 import VrmViewer from './VrmViewer.vue';
+import XunfeiTtsDemo from './XunfeiTtsDemo.vue';
 
 defineProps({
   currentView: String
