@@ -9,8 +9,19 @@ export default {
       return handleXunfeiTtsRequest(request, env);
     }
 
-    // If no API routes matched, pass the request to the static asset handler.
-    // This assumes `env.ASSETS.fetch` is the way to invoke it when [site] is configured.
-    return env.ASSETS.fetch(request);
+    // Check if env.ASSETS is available before attempting to use it
+    if (env.ASSETS) {
+      try {
+        return await env.ASSETS.fetch(request);
+      } catch (e) {
+        // Log the error and return a generic error response
+        console.error(`Error fetching from env.ASSETS: ${e}`);
+        return new Response('Error serving static asset.', { status: 500 });
+      }
+    } else {
+      // Log an error or return a specific response if ASSETS binding is missing
+      console.error("env.ASSETS binding is undefined. Check [site] configuration in wrangler.toml and deployment process.");
+      return new Response("Static asset serving is not configured correctly. env.ASSETS is undefined.", { status: 500 });
+    }
   },
 };
