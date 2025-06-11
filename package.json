@@ -10,6 +10,7 @@
     "deploy": "npm run build && wrangler deploy"
   },
   "dependencies": {
+    "@cloudflare/kv-asset-handler": "^0.4.0",
     "@pixiv/three-vrm": "^3.4.1",
     "axios": "^1.9.0",
     "cors": "^2.8.5",
