@@ -3,6 +3,7 @@ import express from 'express';
 import axios from 'axios';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import CryptoJS from 'crypto-js';
 
 dotenv.config();
 
@@ -32,8 +33,26 @@ app.get('/api/xunfei/voice', async (req, res) => {
 
 // Proxy for TTS WebSocket signature (optional, for frontend to get wsUrl)
 app.get('/api/xunfei/tts-ws-url', (req, res) => {
-  const { authStr } = req.query;
-  if (!authStr) return res.status(400).json({ error: 'Missing authStr' });
+  // Generate authStr on the server-side using environment variables
+  const apiKey = process.env.VITE_XUNFEI_API_KEY;
+  const apiSecret = process.env.VITE_XUNFEI_API_SECRET;
+
+  if (!apiKey || !apiSecret) {
+    console.error('Missing API credentials in .env for local proxy');
+    return res.status(500).json({ error: 'API credentials not configured on server.' });
+  }
+
+  // Re-implement or import getAuthString logic here for the local proxy
+  // For simplicity, copying the core logic. In a larger app, share it.
+  const date = new Date().toGMTString();
+  const host = 'tts-api.xfyun.cn';
+  const origin = `host: ${host}\ndate: ${date}\nGET /v2/tts HTTP/1.1`;
+  const signatureSha = CryptoJS.HmacSHA256(origin, apiSecret);
+  const signature = CryptoJS.enc.Base64.stringify(signatureSha);
+  const authorizationOrigin = `api_key="${apiKey}", algorithm="hmac-sha256", headers="host date request-line", signature="${signature}"`;
+  const authorization = Buffer.from(authorizationOrigin).toString('base64'); // Node.js Buffer for btoa equivalent
+  
+  const authStr = `authorization=${authorization}&date=${date}&host=${host}`;
   const wsUrl = `wss://tts-api.xfyun.cn/v2/tts?${authStr}`;
   res.json({ wsUrl });
 });

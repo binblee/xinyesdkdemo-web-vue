@@ -4,8 +4,6 @@ import axios from 'axios'
 // Instead of hardcoding, read config from environment variables or a global config object
 const config = {
   appId: import.meta.env.VITE_XUNFEI_APP_ID || window.XUNFEI_APP_ID || '',
-  apiKey: import.meta.env.VITE_XUNFEI_API_KEY || window.XUNFEI_API_KEY || '',
-  apiSecret: import.meta.env.VITE_XUNFEI_API_SECRET || window.XUNFEI_API_SECRET || '',
   ttsUrl: 'wss://tts-api.xfyun.cn/v2/tts',
 }
 
@@ -45,8 +43,8 @@ export async function textToSpeech(text, params = {}, useProxy = true) {
 
     if (useProxy) {
       // Fetch the WebSocket URL from the backend proxy.
-      // The proxy will now generate the full signed URL.
-      const proxyUrl = `/api/xunfei/tts-ws-url`; // No authStr needed from client
+      // The proxy (local or Cloudflare Function) is responsible for generating authStr.
+      const proxyUrl = `/api/xunfei/tts-ws-url`; // Do NOT send client-generated authStr
       const response = await axios.get(proxyUrl);
       wsUrl = response.data.wsUrl;
     } else {

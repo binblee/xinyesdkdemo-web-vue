@@ -108,7 +108,7 @@ export default {
             volume: this.volume,
             pitch: this.pitch
             }, 
-            false // True to use the proxy
+            true // True to use the proxy
         )
       } catch (error) {
         console.error('语音合成失败:', error)
