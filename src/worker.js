@@ -1,5 +1,6 @@
 import { handleXunfeiTtsRequest } from './worker-handlers/xunfei-tts';
-import { getAssetFromKV, mapRequestToAsset } from '@cloudflare/kv-asset-handler';
+import { getAssetFromKV } from '@cloudflare/kv-asset-handler';
+import manifestJSON from '__STATIC_CONTENT_MANIFEST';
 
 export default {
   async fetch(request, env, ctx) {
@@ -14,57 +15,47 @@ export default {
 
     // Handle static assets
     try {
-      // Add a custom mapRequestToAsset function to default to index.html for SPA routing
-      const customMapRequestToAsset = (request) => {
-        const defaultAsset = mapRequestToAsset(request);
-        const url = new URL(defaultAsset.url);
-        // If the path has no extension, or is the root, serve index.html
-        if (!url.pathname.split('/').pop().includes('.') || url.pathname === '/') {
-          return new Request(`${url.origin}/index.html`, request);
-        }
-        return defaultAsset;
-      };
-      
       const options = {
-        mapRequestToAsset: customMapRequestToAsset, // Use the custom mapper
         ASSET_NAMESPACE: env.__STATIC_CONTENT,
-        ASSET_MANIFEST: JSON.parse(env.__STATIC_CONTENT_MANIFEST), // Ensure this is passed as a string from wrangler/env
+        ASSET_MANIFEST: manifestJSON,
       };
 
-      const asset = await getAssetFromKV(
+      return await getAssetFromKV(
         {
           request,
-          waitUntil: (promise) => ctx.waitUntil(promise),
+          waitUntil: ctx.waitUntil.bind(ctx),
         },
         options
       );
-      return asset;
     } catch (e) {
       // If getAssetFromKV throws an error, it means the asset was not found.
       // For SPA, try to serve index.html for paths not found.
       console.error(`Error getting asset from KV: ${e.message}`);
-      if (e.constructor.name === 'NotFoundError' || e.constructor.name === 'MethodNotAllowedError') {
-        try {
-          const spaFallbackRequest = new Request(`${new URL(request.url).origin}/index.html`, request);
-          const options = {
-            mapRequestToAsset: (req) => mapRequestToAsset(req), // Use default for direct index.html fetch
-            ASSET_NAMESPACE: env.__STATIC_CONTENT,
-            ASSET_MANIFEST: JSON.parse(env.__STATIC_CONTENT_MANIFEST),
-          };
-          const spaAsset = await getAssetFromKV(
-            {
-              request: spaFallbackRequest,
-              waitUntil: (promise) => ctx.waitUntil(promise),
-            },
-            options
-          );
-          return new Response(spaAsset.body, { ...spaAsset, status: 200 }); // Ensure 200 status for SPA fallback
-        } catch (spaError) {
-          console.error(`Error serving SPA fallback (index.html): ${spaError.message}`);
-          return new Response('Asset not found and SPA fallback failed.', { status: 404 });
-        }
+      
+      // Try to serve index.html for SPA fallback
+      try {
+        const url = new URL(request.url);
+        const indexRequest = new Request(`${url.origin}/index.html`, {
+          method: request.method,
+          headers: request.headers,
+        });
+        
+        const options = {
+          ASSET_NAMESPACE: env.__STATIC_CONTENT,
+          ASSET_MANIFEST: manifestJSON,
+        };
+        
+        return await getAssetFromKV(
+          {
+            request: indexRequest,
+            waitUntil: ctx.waitUntil.bind(ctx),
+          },
+          options
+        );
+      } catch (spaError) {
+        console.error(`Error serving SPA fallback (index.html): ${spaError.message}`);
+        return new Response('Page not found', { status: 404 });
       }
-      return new Response('An unexpected error occurred while serving static assets.', { status: 500 });
     }
   },
 };
