@@ -856,9 +856,13 @@ export default {
 
 <style scoped>
 .camera-test-demo {
-  max-width: 1200px;
+  max-width: 100%;
   margin: 0 auto;
   padding: 20px;
+  background: #ffffff;
+  min-height: 100vh;
+  box-sizing: border-box;
+  overflow-x: hidden;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
@@ -1242,39 +1246,233 @@ export default {
 
 @media (max-width: 768px) {
   .camera-test-demo {
-    padding: 15px;
+    padding: 10px;
+    font-size: 14px;
+  }
+  
+  .header h2 {
+    font-size: 1.5em;
+    margin-bottom: 5px;
+  }
+  
+  .header p {
+    font-size: 0.9em;
+  }
+  
+  .camera-container {
+    margin-bottom: 15px;
   }
   
   .video-wrapper {
     width: 100%;
-    max-width: 480px;
-    height: 360px;
+    max-width: 100%;
+    height: 280px;
+    margin: 0 auto;
+  }
+  
+  .camera-info {
+    top: 10px;
+    left: 10px;
+    padding: 8px;
+    font-size: 11px;
+  }
+  
+  .camera-info .info-item {
+    min-width: 120px;
+    margin-bottom: 3px;
+  }
+  
+  .controls-panel {
+    padding: 15px;
+    gap: 15px;
+    margin-bottom: 20px;
   }
   
   .basic-controls {
     flex-direction: column;
     align-items: stretch;
+    gap: 10px;
   }
   
   .btn {
     width: 100%;
+    padding: 14px 20px;
+    font-size: 16px;
+    touch-action: manipulation;
   }
   
   .camera-select {
     width: 100%;
+    padding: 14px 15px;
+    font-size: 16px;
+    min-width: unset;
+  }
+  
+  .advanced-controls {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 15px;
+  }
+  
+  .resolution-controls {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+  
+  .resolution-controls select {
+    width: 100%;
+    padding: 12px 15px;
+    font-size: 16px;
   }
   
   .status-panel {
     grid-template-columns: 1fr;
-    gap: 20px;
+    gap: 15px;
+  }
+  
+  .device-info h3,
+  .camera-capabilities h3 {
+    font-size: 16px;
+    margin-bottom: 10px;
+  }
+  
+  .info-grid,
+  .capabilities-grid {
+    gap: 8px;
+  }
+  
+  .info-item,
+  .capability-item {
+    padding: 12px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+  }
+  
+  .info-item .label,
+  .capability-item .label {
+    font-size: 12px;
+    margin-bottom: 2px;
+  }
+  
+  .info-item .value,
+  .capability-item .value {
+    font-size: 13px;
+    word-break: break-all;
+  }
+  
+  .webview-debug {
+    padding: 15px;
+    margin-top: 15px;
+  }
+  
+  .webview-debug h3 {
+    font-size: 16px;
+    margin-bottom: 10px;
+  }
+  
+  .webview-debug h4 {
+    font-size: 13px;
+    margin-bottom: 8px;
   }
   
   .debug-controls {
     flex-direction: column;
+    gap: 8px;
+  }
+  
+  .debug-controls .btn {
+    padding: 12px 16px;
+    font-size: 14px;
+  }
+  
+  .webview-info {
+    padding: 12px;
+    margin-bottom: 15px;
   }
   
   .webview-info-grid {
     grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  
+  .debug-log {
+    padding: 12px;
+    font-size: 11px;
+    max-height: 200px;
+  }
+  
+  .debug-log h4 {
+    font-size: 13px;
+    margin-bottom: 8px;
+  }
+  
+  .log-entry {
+    padding: 8px;
+    gap: 8px;
+  }
+  
+  .log-entry .timestamp {
+    font-size: 10px;
+    min-width: 60px;
+  }
+  
+  .log-entry .message {
+    font-size: 11px;
+    line-height: 1.3;
+  }
+  
+  .no-logs {
+    padding: 15px;
+  }
+  
+  .no-logs p {
+    font-size: 14px;
+  }
+}
+
+/* Additional mobile optimizations for very small screens */
+@media (max-width: 480px) {
+  .camera-test-demo {
+    padding: 8px;
+  }
+  
+  .header {
+    margin-bottom: 15px;
+  }
+  
+  .header h2 {
+    font-size: 1.3em;
+  }
+  
+  .video-wrapper {
+    height: 240px;
+  }
+  
+  .camera-info {
+    font-size: 10px;
+    padding: 6px;
+  }
+  
+  .controls-panel {
+    padding: 12px;
+  }
+  
+  .btn {
+    padding: 12px 16px;
+  }
+  
+  .status-panel {
+    gap: 12px;
+  }
+  
+  .webview-debug {
+    padding: 12px;
+  }
+  
+  .debug-log {
+    max-height: 150px;
   }
 }
 </style>

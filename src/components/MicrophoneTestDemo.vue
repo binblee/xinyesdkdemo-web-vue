@@ -440,8 +440,14 @@ export default {
 
 <style scoped>
 .microphone-test-demo {
-  font-family: sans-serif;
+  max-width: 100%;
+  margin: 0 auto;
   padding: 20px;
+  background: #ffffff;
+  min-height: 100vh;
+  box-sizing: border-box;
+  overflow-x: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   background-color: #f4f7f6;
   border-radius: 8px;
   box-shadow: 0 2px 10px rgba(0,0,0,0.1);
@@ -629,5 +635,263 @@ export default {
 .btn-warning:hover:not(:disabled) { background-color: #d39e00; }
 .btn-info { background-color: #17a2b8; color: white; }
 .btn-info:hover:not(:disabled) { background-color: #117a8b; }
+
+/* Mobile Responsive Styles */
+@media (max-width: 768px) {
+  .microphone-test-demo {
+    padding: 10px;
+    font-size: 14px;
+    border-radius: 0;
+    min-height: 100vh;
+  }
+  
+  .header h2 {
+    font-size: 1.5em;
+    margin-bottom: 5px;
+  }
+  
+  .header p {
+    font-size: 0.9em;
+  }
+  
+  .audio-visualization-container {
+    flex-direction: column;
+    gap: 15px;
+    padding: 12px;
+    margin-bottom: 15px;
+  }
+  
+  .vu-meter-wrapper, .waveform-wrapper {
+    width: 100%;
+  }
+  
+  .vu-meter-wrapper progress {
+    width: 100%;
+    max-width: 280px;
+    height: 24px;
+  }
+  
+  .waveform-wrapper canvas {
+    width: 100%;
+    max-width: 280px;
+    height: 80px;
+  }
+  
+  .controls-panel {
+    padding: 15px;
+    margin-bottom: 15px;
+  }
+  
+  .basic-controls {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    margin-bottom: 15px;
+  }
+  
+  .btn {
+    width: 100%;
+    padding: 14px 20px;
+    font-size: 16px;
+    touch-action: manipulation;
+    margin-bottom: 0;
+  }
+  
+  .microphone-select {
+    width: 100%;
+    padding: 14px 15px;
+    font-size: 16px;
+    min-width: unset;
+    flex-grow: unset;
+  }
+  
+  .recording-controls {
+    margin-top: 15px;
+    padding-top: 15px;
+  }
+  
+  .recording-controls h4 {
+    font-size: 1em;
+    margin-bottom: 10px;
+  }
+  
+  .recording-controls button {
+    width: 100%;
+    margin-right: 0;
+    margin-bottom: 10px;
+    padding: 12px 20px;
+    font-size: 15px;
+  }
+  
+  .playback-controls {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+  
+  .playback-controls audio {
+    width: 100%;
+    height: 40px;
+  }
+  
+  .status-panel {
+    padding: 15px;
+  }
+  
+  .device-info h3 {
+    font-size: 1.1em;
+    margin-bottom: 12px;
+  }
+  
+  .info-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  
+  .info-item {
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+  }
+  
+  .info-item .label {
+    font-size: 12px;
+    margin-bottom: 2px;
+  }
+  
+  .info-item .value {
+    font-size: 13px;
+    word-break: break-all;
+  }
+  
+  .error-state {
+    padding: 12px;
+    margin-top: 12px;
+  }
+  
+  .error-message {
+    font-size: 14px;
+  }
+  
+  .recording-controls p {
+    font-size: 14px;
+    text-align: center;
+    background: #e3f2fd;
+    padding: 10px;
+    border-radius: 4px;
+    border: 1px solid #bbdefb;
+  }
+}
+
+/* Additional mobile optimizations for very small screens */
+@media (max-width: 480px) {
+  .microphone-test-demo {
+    padding: 8px;
+  }
+  
+  .header {
+    margin-bottom: 15px;
+  }
+  
+  .header h2 {
+    font-size: 1.3em;
+  }
+  
+  .audio-visualization-container {
+    padding: 10px;
+    gap: 12px;
+  }
+  
+  .vu-meter-wrapper progress {
+    height: 20px;
+  }
+  
+  .waveform-wrapper canvas {
+    height: 60px;
+  }
+  
+  .controls-panel {
+    padding: 12px;
+  }
+  
+  .btn {
+    padding: 12px 16px;
+    font-size: 15px;
+  }
+  
+  .recording-controls button {
+    padding: 10px 16px;
+    font-size: 14px;
+  }
+  
+  .status-panel {
+    padding: 12px;
+  }
+  
+  .info-item {
+    padding: 10px;
+  }
+}
+
+/* Landscape mode optimizations for mobile */
+@media (max-width: 768px) and (orientation: landscape) {
+  .audio-visualization-container {
+    flex-direction: row;
+    justify-content: space-around;
+  }
+  
+  .vu-meter-wrapper, .waveform-wrapper {
+    width: auto;
+  }
+  
+  .vu-meter-wrapper progress {
+    width: 150px;
+  }
+  
+  .waveform-wrapper canvas {
+    width: 200px;
+    height: 60px;
+  }
+  
+  .basic-controls {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+  
+  .btn {
+    flex: 1;
+    min-width: 120px;
+  }
+  
+  .microphone-select {
+    flex: 2;
+    min-width: 200px;
+  }
+}
+
+/* WebView specific optimizations */
+@media (max-width: 768px) {
+  .controls-panel, .status-panel {
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  .btn {
+    -webkit-appearance: none;
+    border: 1px solid transparent;
+  }
+  
+  .microphone-select {
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 16px;
+    padding-right: 40px;
+  }
+}
 
 </style>
