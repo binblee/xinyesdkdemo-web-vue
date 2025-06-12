@@ -116,9 +116,9 @@ export async function textToSpeech(text, params = {}, useProxy = true) {
             aue: 'lame', // audio encoding
             sfl: 1,      // stream flag
             vcn: params.voiceName || 'xiaoyan', // voice name
-            speed: params.speed || 50,
-            volume: params.volume || 50,
-            pitch: params.pitch || 50,
+            speed: parseInt(params.speed) || 50,    // Ensure integer type
+            volume: parseInt(params.volume) || 50,  // Ensure integer type
+            pitch: parseInt(params.pitch) || 50,    // Ensure integer type
             bgs: 0, // background sound
             tte: 'UTF8'  // text encoding
           },
