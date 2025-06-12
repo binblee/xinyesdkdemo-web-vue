@@ -1,13 +1,14 @@
 import { handleXunfeiTtsRequest } from './worker-handlers/xunfei-tts';
 import { getAssetFromKV } from '@cloudflare/kv-asset-handler';
 import manifestJSON from '__STATIC_CONTENT_MANIFEST';
+import { XUNFEI_TTS_API_ENDPOINT } from './services/XunfeiTTS.js';
 
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
 
     // Handle API requests
-    if (url.pathname === '/api/xunfei/tts-ws-url' && request.method === 'GET') {
+    if (url.pathname === XUNFEI_TTS_API_ENDPOINT && request.method === 'GET') {
       return handleXunfeiTtsRequest(request, env);
     }
 

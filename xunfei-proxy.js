@@ -2,7 +2,7 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import { buildXunfeiTtsUrl } from './src/services/XunfeiTTS.js';
+import { buildXunfeiTtsUrl, XUNFEI_TTS_API_ENDPOINT } from './src/services/XunfeiTTS.js';
 
 dotenv.config();
 
@@ -11,7 +11,7 @@ app.use(cors());
 app.use(express.json());
 
 // Proxy for TTS WebSocket signature (optional, for frontend to get wsUrl)
-app.get('/api/xunfei/tts-ws-url', (req, res) => {
+app.get(XUNFEI_TTS_API_ENDPOINT, (req, res) => {
   // Generate authStr on the server-side using environment variables
   const apiKey = process.env.VITE_XUNFEI_API_KEY;
   const apiSecret = process.env.VITE_XUNFEI_API_SECRET;

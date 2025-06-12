@@ -5,6 +5,7 @@ import axios from 'axios'
 export const XUNFEI_TTS_HOST = 'tts-api.xfyun.cn';
 export const XUNFEI_TTS_PATH = '/v2/tts';
 export const XUNFEI_TTS_WS_URL = `wss://${XUNFEI_TTS_HOST}${XUNFEI_TTS_PATH}`;
+export const XUNFEI_TTS_API_ENDPOINT = '/api/xunfei/tts-ws-url';
 
 // Shared authentication function for Xunfei TTS API
 // Works in Node.js, Browser, and Cloudflare Workers environments
@@ -83,7 +84,7 @@ export async function textToSpeech(text, params = {}, useProxy = true) {
     if (useProxy) {
       // Fetch the WebSocket URL from the backend proxy.
       // The proxy (local or Cloudflare Function) is responsible for generating authStr.
-      const proxyUrl = `/api/xunfei/tts-ws-url`; // Do NOT send client-generated authStr
+      const proxyUrl = XUNFEI_TTS_API_ENDPOINT; // Use shared constant
       const response = await axios.get(proxyUrl);
       wsUrl = response.data.wsUrl;
       appId = response.data.appId; // Get the APP ID from the server response

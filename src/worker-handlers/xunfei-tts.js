@@ -9,7 +9,7 @@ import { buildXunfeiTtsUrl } from '../services/XunfeiTTS.js';
 // 1. User clicks   2. Calls       3. HTTP GET   4. Generate   5. WebSocket
 //    "Synthesize"     textToSpeech()  request      auth string    connection
 //      ↓              ↓              ↓            ↓             ↓
-// 6. Receives      7. Creates      8. Returns    9. Server-side 10. Audio
+// 10. Receives      9. Creates      8. Returns    7. Server-side 6. Audio
 //    audio data       WebSocket       wsUrl +      security       synthesis
 //                     connection      appId
 
