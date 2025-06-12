@@ -1,4 +1,4 @@
-import CryptoJS from 'crypto-js';
+import { buildXunfeiTtsUrl } from '../services/XunfeiTTS.js';
 
 //
 // The server-side handler that runs in Cloudflare Worker
@@ -13,26 +13,10 @@ import CryptoJS from 'crypto-js';
 //    audio data       WebSocket       wsUrl +      security       synthesis
 //                     connection      appId
 
-// Helper function to generate Xunfei Auth String
-// - Secure server-side authentication generation
-// - Uses API key and secret from environment variables
-// - Creates HMAC-SHA256 signature for Xunfei API authentication
-// - Returns properly formatted authorization string
-function getAuthStringFromServer(method, path, apiKey, apiSecret) {
-  const date = new Date().toGMTString();
-  const host = 'tts-api.xfyun.cn';
-  const origin = `host: ${host}\ndate: ${date}\n${method} ${path} HTTP/1.1`;
-  const signatureSha = CryptoJS.HmacSHA256(origin, apiSecret);
-  const signature = CryptoJS.enc.Base64.stringify(signatureSha);
-  const authorizationOrigin = `api_key="${apiKey}", algorithm="hmac-sha256", headers="host date request-line", signature="${signature}"`;
-  const authorization = btoa(authorizationOrigin); // btoa is available in Cloudflare Workers
-  return `authorization=${authorization}&date=${date}&host=${host}`;
-}
-
 // Main handler for Xunfei TTS WebSocket URL requests
 // - Handles GET requests to /api/xunfei/tts-ws-url
 // - Validates presence of API credentials in environment variables
-// - Generates auth string using getAuthStringFromServer
+// - Generates auth string using shared generateXunfeiAuth function
 // - Constructs WebSocket URL for Xunfei TTS API
 export async function handleXunfeiTtsRequest(request, env) {
   // Access your secrets stored in Cloudflare Worker environment variables
@@ -54,9 +38,8 @@ export async function handleXunfeiTtsRequest(request, env) {
     });
   }
 
-  // Generate authStr on the server-side
-  const authStr = getAuthStringFromServer('GET', '/v2/tts', apiKey, apiSecret);
-  const wsUrl = `wss://tts-api.xfyun.cn/v2/tts?${authStr}`;
+  // Generate WebSocket URL with authentication using shared helper
+  const wsUrl = buildXunfeiTtsUrl(apiKey, apiSecret);
 
   return new Response(JSON.stringify({ wsUrl, appId }), {
     headers: { 'Content-Type': 'application/json' },

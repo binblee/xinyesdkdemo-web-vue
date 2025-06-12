@@ -2,7 +2,7 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import CryptoJS from 'crypto-js';
+import { buildXunfeiTtsUrl } from './src/services/XunfeiTTS.js';
 
 dotenv.config();
 
@@ -29,18 +29,8 @@ app.get('/api/xunfei/tts-ws-url', (req, res) => {
     });
   }
 
-  // Re-implement or import getAuthString logic here for the local proxy
-  // For simplicity, copying the core logic. In a larger app, share it.
-  const date = new Date().toGMTString();
-  const host = 'tts-api.xfyun.cn';
-  const origin = `host: ${host}\ndate: ${date}\nGET /v2/tts HTTP/1.1`;
-  const signatureSha = CryptoJS.HmacSHA256(origin, apiSecret);
-  const signature = CryptoJS.enc.Base64.stringify(signatureSha);
-  const authorizationOrigin = `api_key="${apiKey}", algorithm="hmac-sha256", headers="host date request-line", signature="${signature}"`;
-  const authorization = Buffer.from(authorizationOrigin).toString('base64'); // Node.js Buffer for btoa equivalent
-  
-  const authStr = `authorization=${authorization}&date=${date}&host=${host}`;
-  const wsUrl = `wss://tts-api.xfyun.cn/v2/tts?${authStr}`;
+  // Generate WebSocket URL with authentication using shared helper
+  const wsUrl = buildXunfeiTtsUrl(apiKey, apiSecret);
   res.json({ wsUrl, appId });
 });
 

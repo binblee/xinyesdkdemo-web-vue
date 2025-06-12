@@ -1,29 +1,63 @@
 import CryptoJS from 'crypto-js'
 import axios from 'axios'
 
-// Instead of hardcoding, read config from environment variables or a global config object
-const config = {
-    appId: import.meta.env.VITE_XUNFEI_APP_ID || window.XUNFEI_APP_ID || '',
-    apiKey: import.meta.env.VITE_XUNFEI_API_KEY || window.XUNFEI_API_KEY || '',
-    apiSecret: import.meta.env.VITE_XUNFEI_API_SECRET || window.XUNFEI_API_SECRET || '',
-    ttsUrl: 'wss://tts-api.xfyun.cn/v2/tts',
-};
+// Xunfei TTS API constants
+export const XUNFEI_TTS_HOST = 'tts-api.xfyun.cn';
+export const XUNFEI_TTS_PATH = '/v2/tts';
+export const XUNFEI_TTS_WS_URL = `wss://${XUNFEI_TTS_HOST}${XUNFEI_TTS_PATH}`;
 
-// 生成鉴权签名，直联方式使用
-// 该函数在客户端生成鉴权字符串，可能会暴露 apiSecret，
+// Shared authentication function for Xunfei TTS API
+// Works in Node.js, Browser, and Cloudflare Workers environments
+export function generateXunfeiAuth(apiKey, apiSecret, method = 'GET', path = XUNFEI_TTS_PATH) {
+  const date = new Date().toGMTString();
+  const host = XUNFEI_TTS_HOST;
+  const origin = `host: ${host}\ndate: ${date}\n${method} ${path} HTTP/1.1`;
+  
+  const signatureSha = CryptoJS.HmacSHA256(origin, apiSecret);
+  const signature = CryptoJS.enc.Base64.stringify(signatureSha);
+  const authorizationOrigin = `api_key="${apiKey}", algorithm="hmac-sha256", headers="host date request-line", signature="${signature}"`;
+  
+  // Universal base64 encoding (works in Node.js, Browser, and Workers)
+  const authorization = typeof Buffer !== 'undefined' 
+    ? Buffer.from(authorizationOrigin).toString('base64')  // Node.js
+    : btoa(authorizationOrigin);                           // Browser/Workers
+  
+  return `authorization=${authorization}&date=${date}&host=${host}`;
+}
+
+// Helper function to build complete WebSocket URL with authentication
+export function buildXunfeiTtsUrl(apiKey, apiSecret) {
+  const authStr = generateXunfeiAuth(apiKey, apiSecret);
+  return `${XUNFEI_TTS_WS_URL}?${authStr}`;
+}
+
+// Instead of hardcoding, read config from environment variables or a global config object
+// Use a function to avoid import.meta.env access issues in Node.js environments
+function getConfig() {
+  // Check if we're in a Vite environment (browser/build) vs Node.js
+  const isViteEnvironment = typeof import.meta !== 'undefined' && import.meta.env;
+  
+  return {
+    appId: isViteEnvironment 
+      ? (import.meta.env.VITE_XUNFEI_APP_ID || window.XUNFEI_APP_ID || '') 
+      : (process.env.VITE_XUNFEI_APP_ID || ''),
+    apiKey: isViteEnvironment 
+      ? (import.meta.env.VITE_XUNFEI_API_KEY || window.XUNFEI_API_KEY || '') 
+      : (process.env.VITE_XUNFEI_API_KEY || ''),
+    apiSecret: isViteEnvironment 
+      ? (import.meta.env.VITE_XUNFEI_API_SECRET || window.XUNFEI_API_SECRET || '') 
+      : (process.env.VITE_XUNFEI_API_SECRET || ''),
+    ttsUrl: XUNFEI_TTS_WS_URL,
+  };
+}
+
+// 生成鉴权签名，直联方式使用 (DEPRECATED - INSECURE)
+// 该函数在客户端生成鉴权字符串，会暴露 apiSecret，
 // 仅在不使用代理的情况下使用，建议在服务端生成 authStr
 function getAuthString(method, path) {
-  const date = new Date().toGMTString()
-  const host = 'tts-api.xfyun.cn'
-  const origin = `host: ${host}\ndate: ${date}\n${method} ${path} HTTP/1.1`
-  
-  const signatureSha = CryptoJS.HmacSHA256(origin, config.apiSecret)
-  const signature = CryptoJS.enc.Base64.stringify(signatureSha)
-  
-  const authorizationOrigin = `api_key="${config.apiKey}", algorithm="hmac-sha256", headers="host date request-line", signature="${signature}"`
-  const authorization = btoa(authorizationOrigin)
-  
-  return `authorization=${authorization}&date=${date}&host=${host}`
+  // Use the shared authentication function with new parameter order
+  const config = getConfig();
+  return generateXunfeiAuth(config.apiKey, config.apiSecret, method, path);
 }
 
 // 获取发音人列表
@@ -56,6 +90,7 @@ export async function textToSpeech(text, params = {}, useProxy = true) {
     } else {
       // Construct WebSocket URL directly (for scenarios where proxy is not used/needed)
       // THIS PATH REMAINS A SECURITY RISK FOR API_SECRET if config.apiSecret is exposed client-side
+      const config = getConfig();
       const authStr = getAuthString('GET', '/v2/tts'); // Client generates authStr
       wsUrl = `${config.ttsUrl}?${authStr}`;
       appId = config.appId; // Use the client-side config
