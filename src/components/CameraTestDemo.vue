@@ -139,6 +139,62 @@
           </div>
         </div>
       </div>
+
+      <!-- WebView Debug Panel -->
+      <div class="webview-debug" v-if="isWebView()">
+        <h3>🤖 WebView Debug Panel</h3>
+        <div class="debug-controls">
+          <button @click="runWebViewDiagnostics" class="btn btn-secondary">
+            🔧 Run WebView Diagnostics
+          </button>
+          <button @click="testAndroidBridge" class="btn btn-secondary" v-if="androidInterfaceAvailable.includes('✅')">
+            📱 Test Android Bridge
+          </button>
+          <button @click="exportDebugLog" class="btn btn-secondary">
+            📋 Export Debug Log
+          </button>
+          <button @click="clearDebugLog" class="btn btn-outline">
+            🗑️ Clear Log
+          </button>
+        </div>
+        
+        <div class="webview-info">
+          <h4>📊 WebView Information</h4>
+          <div class="webview-info-grid">
+            <div class="info-item">
+              <span class="label">Chrome Version:</span>
+              <span class="value">{{ getChromeVersion() }}</span>
+            </div>
+            <div class="info-item">
+              <span class="label">Android Interface:</span>
+              <span class="value">{{ androidInterfaceAvailable }}</span>
+            </div>
+            <div class="info-item">
+              <span class="label">Screen Size:</span>
+              <span class="value">{{ currentScreenInfo }}</span>
+            </div>
+            <div class="info-item">
+              <span class="label">Pixel Ratio:</span>
+              <span class="value">{{ currentPixelRatio }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="debug-log" v-if="debugLog.length > 0">
+          <h4>📝 Debug Log (Last {{ Math.min(debugLog.length, 10) }} entries)</h4>
+          <div class="log-entries">
+            <div v-for="(entry, index) in debugLog.slice(-10)" :key="index" 
+                 class="log-entry" :class="entry.type">
+              <span class="timestamp">{{ entry.timestamp }}</span>
+              <span class="message">{{ entry.message }}</span>
+            </div>
+          </div>
+        </div>
+        
+        <div v-else class="no-logs">
+          <p>📝 No debug logs yet. Click "Run WebView Diagnostics" to start logging.</p>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -178,6 +234,9 @@ export default {
       fpsMonitorInterval: null,
       lastFrameTime: 0,
       frameCount: 0,
+
+      // WebView debugging
+      debugLog: [],
     }
   },
   
@@ -212,16 +271,12 @@ export default {
       return typeof window !== 'undefined' && typeof window.Android !== 'undefined' ? '✅ Available' : '❌ Not Available';
     },
 
-    currentProtocol() {
-      return typeof window !== 'undefined' ? window.location.protocol : 'unknown';
+    currentScreenInfo() {
+      return typeof screen !== 'undefined' ? `${screen.width}×${screen.height}` : 'Unknown';
     },
 
-    userAgentSlice() {
-      return typeof navigator !== 'undefined' ? `${navigator.userAgent.slice(0, 100)}...` : 'Unknown';
-    },
-
-    androidInterfaceAvailable() {
-      return typeof window !== 'undefined' && typeof window.Android !== 'undefined' ? '✅ Available' : '❌ Not Available';
+    currentPixelRatio() {
+      return typeof window !== 'undefined' ? window.devicePixelRatio || 1 : 'Unknown';
     }
   },
   
@@ -253,6 +308,17 @@ export default {
       return match ? match[1] : 'Unknown';
     },
 
+    addDebugLog(message, type = 'info') {
+      const timestamp = new Date().toLocaleTimeString();
+      this.debugLog.push({ timestamp, message, type });
+      console.log(`[${timestamp}] ${message}`);
+      
+      // Keep only last 50 entries to prevent memory issues
+      if (this.debugLog.length > 50) {
+        this.debugLog = this.debugLog.slice(-50);
+      }
+    },
+
     getWebViewDebugInfo() {
       return {
         userAgent: navigator.userAgent,
@@ -277,23 +343,124 @@ export default {
 
     logWebViewDebugInfo() {
       const debugInfo = this.getWebViewDebugInfo();
-      console.log('🎥 Starting camera...');
-      console.log('📊 WebView Debug Info:', debugInfo);
+      this.addDebugLog('🎥 Starting camera...', 'info');
+      this.addDebugLog(`📊 WebView Debug Info: ${JSON.stringify(debugInfo, null, 2)}`, 'info');
       
       if (debugInfo.isWebView) {
-        console.log('🤖 WebView detected - applying WebView-specific configurations');
-        console.log('🔧 Android interface available:', debugInfo.androidInterface);
-        console.log('🏗️ Chrome version:', debugInfo.chromeVersion);
+        this.addDebugLog('🤖 WebView detected - applying WebView-specific configurations', 'info');
+        this.addDebugLog(`🔧 Android interface available: ${debugInfo.androidInterface}`, 'info');
+        this.addDebugLog(`🏗️ Chrome version: ${debugInfo.chromeVersion}`, 'info');
         
         // WebView specific warnings
         if (debugInfo.protocol !== 'https:' && debugInfo.origin !== 'http://localhost' && !debugInfo.origin.includes('127.0.0.1')) {
-          console.warn('⚠️ WebView camera access may require HTTPS for production');
+          this.addDebugLog('⚠️ WebView camera access may require HTTPS for production', 'warning');
         }
         
         if (debugInfo.chromeVersion && parseInt(debugInfo.chromeVersion) < 70) {
-          console.warn('⚠️ Old Chrome version detected. Camera support may be limited');
+          this.addDebugLog('⚠️ Old Chrome version detected. Camera support may be limited', 'warning');
         }
       }
+    },
+
+    async runWebViewDiagnostics() {
+      this.addDebugLog('🔍 Running WebView diagnostics...', 'info');
+      
+      // Test basic WebView detection
+      this.addDebugLog(`WebView detected: ${this.isWebView()}`, 'info');
+      
+      // Test Chrome version
+      const chromeVersion = this.getChromeVersion();
+      this.addDebugLog(`Chrome version: ${chromeVersion}`, 'info');
+      
+      // Test media device support
+      this.addDebugLog(`MediaDevices available: ${!!navigator.mediaDevices}`, 'info');
+      this.addDebugLog(`getUserMedia available: ${!!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia)}`, 'info');
+      
+      // Test Android bridge
+      if (typeof window.Android !== 'undefined') {
+        this.addDebugLog('Android bridge is available', 'success');
+        try {
+          // Test if Android bridge methods are callable
+          if (typeof window.Android.showToast === 'function') {
+            this.addDebugLog('Android.showToast method is available', 'success');
+          }
+        } catch (error) {
+          this.addDebugLog(`Android bridge test failed: ${error.message}`, 'error');
+        }
+      } else {
+        this.addDebugLog('Android bridge is not available', 'warning');
+      }
+      
+      // Test camera enumeration
+      try {
+        if (navigator.mediaDevices && navigator.mediaDevices.enumerateDevices) {
+          const devices = await navigator.mediaDevices.enumerateDevices();
+          const cameras = devices.filter(device => device.kind === 'videoinput');
+          this.addDebugLog(`Found ${cameras.length} camera devices`, 'success');
+          cameras.forEach((camera, index) => {
+            this.addDebugLog(`Camera ${index + 1}: ${camera.label || 'No label'} (${camera.deviceId.slice(0, 8)}...)`, 'info');
+          });
+        }
+      } catch (error) {
+        this.addDebugLog(`Camera enumeration failed: ${error.message}`, 'error');
+      }
+      
+      // Test permissions
+      try {
+        if ('permissions' in navigator) {
+          const permission = await navigator.permissions.query({ name: 'camera' });
+          this.addDebugLog(`Camera permission status: ${permission.state}`, 'info');
+        }
+      } catch (error) {
+        this.addDebugLog(`Permission check failed: ${error.message}`, 'error');
+      }
+      
+      this.addDebugLog('✅ WebView diagnostics complete', 'success');
+    },
+
+    testAndroidBridge() {
+      if (typeof window.Android !== 'undefined') {
+        try {
+          if (typeof window.Android.showToast === 'function') {
+            window.Android.showToast('Camera WebView Test - Android Bridge Working!');
+            this.addDebugLog('✅ Android bridge test successful', 'success');
+          } else {
+            this.addDebugLog('❌ Android.showToast method not available', 'error');
+          }
+        } catch (error) {
+          this.addDebugLog(`❌ Android bridge test failed: ${error.message}`, 'error');
+        }
+      } else {
+        this.addDebugLog('❌ Android bridge not available', 'error');
+      }
+    },
+
+    exportDebugLog() {
+      const logData = {
+        timestamp: new Date().toISOString(),
+        userAgent: navigator.userAgent,
+        debugInfo: this.getWebViewDebugInfo(),
+        logs: this.debugLog
+      };
+      
+      const dataStr = JSON.stringify(logData, null, 2);
+      const blob = new Blob([dataStr], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `webview-camera-debug-${Date.now()}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      
+      this.addDebugLog('📋 Debug log exported successfully', 'success');
+    },
+
+    clearDebugLog() {
+      this.debugLog = [];
+      this.addDebugLog('🗑️ Debug log cleared', 'info');
     },
 
     getWebViewCompatibleConstraints() {
@@ -339,13 +506,13 @@ export default {
     },
 
     handleCameraErrorWithWebViewSupport(error) {
-      console.error('📋 Detailed error analysis:', {
+      this.addDebugLog(`❌ Camera error: ${error.name} - ${error.message}`, 'error');
+      this.addDebugLog(`📋 Detailed error analysis: ${JSON.stringify({
         name: error.name,
         message: error.message,
-        stack: error.stack,
         isWebView: this.isWebView(),
         debugInfo: this.getWebViewDebugInfo()
-      });
+      }, null, 2)}`, 'error');
 
       switch (error.name) {
         case 'NotAllowedError':
@@ -381,12 +548,12 @@ export default {
 
       // Log WebView specific troubleshooting info
       if (this.isWebView()) {
-        console.log('🔧 WebView Troubleshooting Tips:');
-        console.log('1. Check Android app has CAMERA permission in manifest');
-        console.log('2. Ensure WebView has camera access enabled');
-        console.log('3. Update Android System WebView if possible');
-        console.log('4. Test with HTTPS URL for production');
-        console.log('5. Check if hardware acceleration is enabled');
+        this.addDebugLog('🔧 WebView Troubleshooting Tips:', 'info');
+        this.addDebugLog('1. Check Android app has CAMERA permission in manifest', 'info');
+        this.addDebugLog('2. Ensure WebView has camera access enabled', 'info');
+        this.addDebugLog('3. Update Android System WebView if possible', 'info');
+        this.addDebugLog('4. Test with HTTPS URL for production', 'info');
+        this.addDebugLog('5. Check if hardware acceleration is enabled', 'info');
       }
     },
 
@@ -507,7 +674,7 @@ export default {
         }
         
         const constraints = this.getWebViewCompatibleConstraints();
-        console.log('📋 Camera constraints:', JSON.stringify(constraints, null, 2));
+        this.addDebugLog(`📋 Camera constraints: ${JSON.stringify(constraints, null, 2)}`, 'info');
         
         // Add timeout for WebView debugging with longer timeout
         const timeoutDuration = this.isWebView() ? 20000 : 10000; // 20s for WebView, 10s for browser
@@ -516,9 +683,9 @@ export default {
           setTimeout(() => reject(new Error(`getUserMedia timeout after ${timeoutDuration/1000} seconds`)), timeoutDuration);
         });
         
-        console.log('⏳ Requesting camera access...');
+        this.addDebugLog('⏳ Requesting camera access...', 'info');
         this.currentStream = await Promise.race([getUserMediaPromise, timeoutPromise]);
-        console.log('✅ Camera stream obtained');
+        this.addDebugLog('✅ Camera stream obtained', 'success');
         
         // Set up video element
         const video = this.$refs.videoElement;
@@ -526,8 +693,8 @@ export default {
         
         // Get track info
         this.currentTrack = this.currentStream.getVideoTracks()[0];
-        console.log('📹 Video track:', this.currentTrack.label || 'No label');
-        console.log('📊 Track settings:', this.currentTrack.getSettings ? this.currentTrack.getSettings() : 'N/A');
+        this.addDebugLog(`📹 Video track: ${this.currentTrack.label || 'No label'}`, 'info');
+        this.addDebugLog(`📊 Track settings: ${JSON.stringify(this.currentTrack.getSettings ? this.currentTrack.getSettings() : 'N/A', null, 2)}`, 'info');
         
         this.currentCameraLabel = this.getCurrentCameraLabel();
         
@@ -535,15 +702,15 @@ export default {
         try {
           if (this.currentTrack.getCapabilities) {
             this.currentCapabilities = this.currentTrack.getCapabilities();
-            console.log('🔧 Camera capabilities:', this.currentCapabilities);
+            this.addDebugLog(`🔧 Camera capabilities: ${JSON.stringify(this.currentCapabilities, null, 2)}`, 'info');
           }
         } catch (capError) {
-          console.warn('⚠️ Could not get camera capabilities:', capError);
+          this.addDebugLog(`⚠️ Could not get camera capabilities: ${capError.message}`, 'warning');
           this.currentCapabilities = null;
         }
         
         // Wait for video to load with timeout
-        console.log('⏱️ Waiting for video metadata...');
+        this.addDebugLog('⏱️ Waiting for video metadata...', 'info');
         await new Promise((resolve, reject) => {
           const timeout = setTimeout(() => {
             reject(new Error('Video metadata timeout'));
@@ -554,27 +721,27 @@ export default {
             resolve();
           }, { once: true });
         });
-        console.log('📺 Video metadata loaded');
+        this.addDebugLog('📺 Video metadata loaded', 'success');
         
         // Update resolution info
         this.updateResolutionInfo();
-        console.log('📐 Final resolution:', this.currentResolution);
+        this.addDebugLog(`📐 Final resolution: ${this.currentResolution}`, 'info');
         
         // Start FPS monitoring
         this.startFpsMonitoring();
         
         this.isCameraActive = true;
-        console.log('🎉 Camera started successfully');
+        this.addDebugLog('🎉 Camera started successfully', 'success');
         
         // Re-enumerate devices to get updated labels (with error handling)
         try {
           await this.enumerateDevices();
         } catch (enumError) {
-          console.warn('⚠️ Could not re-enumerate devices:', enumError);
+          this.addDebugLog(`⚠️ Could not re-enumerate devices: ${enumError.message}`, 'warning');
         }
         
       } catch (error) {
-        console.error('❌ Error starting camera:', error);
+        this.addDebugLog(`❌ Error starting camera: ${error.message}`, 'error');
         this.handleCameraErrorWithWebViewSupport(error);
       } finally {
         this.isLoading = false;
@@ -585,6 +752,7 @@ export default {
       if (this.currentStream) {
         this.currentStream.getTracks().forEach(track => track.stop());
         this.currentStream = null;
+        this.addDebugLog('📴 Camera stopped', 'info');
       }
       
       if (this.fpsMonitorInterval) {
@@ -965,6 +1133,139 @@ export default {
   font-family: 'Monaco', monospace;
 }
 
+/* WebView Debug Panel Styles */
+.webview-debug {
+  grid-column: 1 / -1;
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 12px;
+  border: 2px solid #e9ecef;
+  margin-top: 20px;
+}
+
+.webview-debug h3 {
+  color: #2c3e50;
+  margin-bottom: 15px;
+  font-size: 18px;
+}
+
+.webview-debug h4 {
+  color: #34495e;
+  margin-bottom: 10px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.debug-controls {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.btn-outline {
+  background: transparent;
+  color: #6c757d;
+  border: 2px solid #6c757d;
+}
+
+.btn-outline:hover:not(:disabled) {
+  background: #6c757d;
+  color: white;
+}
+
+.webview-info {
+  background: white;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  border: 1px solid #dee2e6;
+}
+
+.webview-info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 10px;
+}
+
+.debug-log {
+  background: #2c3e50;
+  border-radius: 8px;
+  padding: 15px;
+  color: white;
+  font-family: 'Monaco', 'Consolas', monospace;
+  font-size: 12px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.debug-log h4 {
+  color: #ecf0f1;
+  margin-bottom: 10px;
+  font-size: 14px;
+}
+
+.log-entries {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.log-entry {
+  display: flex;
+  gap: 10px;
+  padding: 5px 8px;
+  border-radius: 4px;
+  line-height: 1.4;
+}
+
+.log-entry.info {
+  background: rgba(52, 152, 219, 0.1);
+  border-left: 3px solid #3498db;
+}
+
+.log-entry.success {
+  background: rgba(46, 204, 113, 0.1);
+  border-left: 3px solid #2ecc71;
+}
+
+.log-entry.warning {
+  background: rgba(241, 196, 15, 0.1);
+  border-left: 3px solid #f1c40f;
+}
+
+.log-entry.error {
+  background: rgba(231, 76, 60, 0.1);
+  border-left: 3px solid #e74c3c;
+}
+
+.log-entry .timestamp {
+  color: #95a5a6;
+  flex-shrink: 0;
+  font-size: 11px;
+  min-width: 70px;
+}
+
+.log-entry .message {
+  flex: 1;
+  word-break: break-word;
+  white-space: pre-wrap;
+}
+
+.no-logs {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  text-align: center;
+  color: #6c757d;
+  border: 1px solid #dee2e6;
+}
+
+.no-logs p {
+  margin: 0;
+  font-style: italic;
+}
+
 @media (max-width: 768px) {
   .camera-test-demo {
     padding: 15px;
@@ -992,6 +1293,14 @@ export default {
   .status-panel {
     grid-template-columns: 1fr;
     gap: 20px;
+  }
+  
+  .debug-controls {
+    flex-direction: column;
+  }
+  
+  .webview-info-grid {
+    grid-template-columns: 1fr;
   }
 }
 </style>
