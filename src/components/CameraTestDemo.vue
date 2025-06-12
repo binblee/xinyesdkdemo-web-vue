@@ -115,6 +115,18 @@
             <span class="label">Permissions:</span>
             <span class="value">{{ permissionStatus }}</span>
           </div>
+          <div class="info-item">
+            <span class="label">Is WebView:</span>
+            <span class="value">{{ isWebView() ? '📱 Yes' : '🖥️ No' }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">Protocol:</span>
+            <span class="value">{{ currentProtocol }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">User Agent:</span>
+            <span class="value" style="font-size: 10px; word-break: break-all;">{{ userAgentSlice }}</span>
+          </div>
         </div>
       </div>
 
@@ -186,6 +198,30 @@ export default {
         facingMode: caps.facingMode || 'N/A',
         aspectRatio: this.formatRange(caps.aspectRatio),
       };
+    },
+
+    currentProtocol() {
+      return typeof window !== 'undefined' ? window.location.protocol : 'unknown';
+    },
+
+    userAgentSlice() {
+      return typeof navigator !== 'undefined' ? `${navigator.userAgent.slice(0, 100)}...` : 'Unknown';
+    },
+
+    androidInterfaceAvailable() {
+      return typeof window !== 'undefined' && typeof window.Android !== 'undefined' ? '✅ Available' : '❌ Not Available';
+    },
+
+    currentProtocol() {
+      return typeof window !== 'undefined' ? window.location.protocol : 'unknown';
+    },
+
+    userAgentSlice() {
+      return typeof navigator !== 'undefined' ? `${navigator.userAgent.slice(0, 100)}...` : 'Unknown';
+    },
+
+    androidInterfaceAvailable() {
+      return typeof window !== 'undefined' && typeof window.Android !== 'undefined' ? '✅ Available' : '❌ Not Available';
     }
   },
   
@@ -201,6 +237,159 @@ export default {
   },
   
   methods: {
+    // WebView Detection and Debugging
+    isWebView() {
+      const userAgent = navigator.userAgent || '';
+      // Check for common WebView indicators
+      return userAgent.includes('wv') || // Android WebView
+             userAgent.includes('Version/') && userAgent.includes('Mobile Safari') && !userAgent.includes('CriOS') || // iOS WebView
+             window.chrome && !window.chrome.app || // Chrome WebView
+             typeof window.orientation !== 'undefined' && !window.MSStream; // Mobile device check
+    },
+
+    getChromeVersion() {
+      const userAgent = navigator.userAgent;
+      const match = userAgent.match(/Chrome\/(\d+)/);
+      return match ? match[1] : 'Unknown';
+    },
+
+    getWebViewDebugInfo() {
+      return {
+        userAgent: navigator.userAgent,
+        isWebView: this.isWebView(),
+        protocol: window.location.protocol,
+        origin: window.location.origin,
+        chromeVersion: this.getChromeVersion(),
+        androidInterface: typeof window.Android !== 'undefined',
+        screen: {
+          width: screen.width,
+          height: screen.height,
+          pixelRatio: window.devicePixelRatio
+        },
+        permissions: this.permissionStatus,
+        mediaDevices: {
+          available: !!navigator.mediaDevices,
+          getUserMedia: !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia),
+          enumerateDevices: !!(navigator.mediaDevices && navigator.mediaDevices.enumerateDevices)
+        }
+      };
+    },
+
+    logWebViewDebugInfo() {
+      const debugInfo = this.getWebViewDebugInfo();
+      console.log('🎥 Starting camera...');
+      console.log('📊 WebView Debug Info:', debugInfo);
+      
+      if (debugInfo.isWebView) {
+        console.log('🤖 WebView detected - applying WebView-specific configurations');
+        console.log('🔧 Android interface available:', debugInfo.androidInterface);
+        console.log('🏗️ Chrome version:', debugInfo.chromeVersion);
+        
+        // WebView specific warnings
+        if (debugInfo.protocol !== 'https:' && debugInfo.origin !== 'http://localhost' && !debugInfo.origin.includes('127.0.0.1')) {
+          console.warn('⚠️ WebView camera access may require HTTPS for production');
+        }
+        
+        if (debugInfo.chromeVersion && parseInt(debugInfo.chromeVersion) < 70) {
+          console.warn('⚠️ Old Chrome version detected. Camera support may be limited');
+        }
+      }
+    },
+
+    getWebViewCompatibleConstraints() {
+      const constraints = {
+        video: {
+          // WebView-specific optimizations
+          width: { ideal: 640, max: 1280 },
+          height: { ideal: 480, max: 720 },
+          frameRate: { ideal: 30, max: 30 }
+        }
+      };
+
+      // Only add deviceId constraint if it's not 'default'
+      if (this.selectedCameraId && this.selectedCameraId !== 'default') {
+        // Use 'ideal' instead of 'exact' for better WebView compatibility
+        constraints.video.deviceId = this.isWebView() 
+          ? { ideal: this.selectedCameraId }
+          : { exact: this.selectedCameraId };
+      }
+
+      // Apply resolution constraints with WebView fallbacks
+      if (this.selectedResolution !== 'auto') {
+        const resolutions = {
+          '480p': { width: 640, height: 480 },
+          '720p': { width: 1280, height: 720 },
+          '1080p': { width: 1920, height: 1080 }
+        };
+        
+        const resolution = resolutions[this.selectedResolution];
+        if (resolution) {
+          if (this.isWebView()) {
+            // Use 'ideal' for WebView compatibility
+            constraints.video.width = { ideal: resolution.width };
+            constraints.video.height = { ideal: resolution.height };
+          } else {
+            constraints.video.width = { ideal: resolution.width };
+            constraints.video.height = { ideal: resolution.height };
+          }
+        }
+      }
+
+      return constraints;
+    },
+
+    handleCameraErrorWithWebViewSupport(error) {
+      console.error('📋 Detailed error analysis:', {
+        name: error.name,
+        message: error.message,
+        stack: error.stack,
+        isWebView: this.isWebView(),
+        debugInfo: this.getWebViewDebugInfo()
+      });
+
+      switch (error.name) {
+        case 'NotAllowedError':
+          if (this.isWebView()) {
+            this.error = 'Camera access denied. WebView may need camera permissions enabled in the app settings. Check Android app permissions.';
+          } else {
+            this.error = 'Camera access denied. Please grant permission and try again.';
+          }
+          break;
+        case 'NotFoundError':
+          this.error = 'No camera found on this device.';
+          break;
+        case 'NotSupportedError':
+          if (this.isWebView()) {
+            this.error = 'Camera not supported in this WebView. The app may need to update WebView settings or use a newer Android System WebView.';
+          } else {
+            this.error = 'Camera not supported by this browser.';
+          }
+          break;
+        case 'OverconstrainedError':
+          this.error = 'Camera constraints not supported. Try a different resolution or camera.';
+          break;
+        case 'SecurityError':
+          this.error = 'Security error: Camera access blocked. Check HTTPS/localhost requirements.';
+          break;
+        default:
+          if (error.message.includes('timeout')) {
+            this.error = 'Camera startup timeout. This may be a WebView issue - try restarting the app.';
+          } else {
+            this.error = `Camera error: ${error.message}`;
+          }
+      }
+
+      // Log WebView specific troubleshooting info
+      if (this.isWebView()) {
+        console.log('🔧 WebView Troubleshooting Tips:');
+        console.log('1. Check Android app has CAMERA permission in manifest');
+        console.log('2. Ensure WebView has camera access enabled');
+        console.log('3. Update Android System WebView if possible');
+        console.log('4. Test with HTTPS URL for production');
+        console.log('5. Check if hardware acceleration is enabled');
+      }
+    },
+
     async initializeCamera() {
       // Check browser support with more comprehensive detection
       this.browserSupport = this.checkBrowserSupport();
@@ -308,16 +497,28 @@ export default {
       this.isLoading = true;
       this.error = null;
       
+      // Log WebView debug information
+      this.logWebViewDebugInfo();
+      
       try {
         // Double-check browser support before attempting to start camera
         if (!this.checkBrowserSupport()) {
           throw new Error('Camera API not available. Please use HTTPS and a modern browser.');
         }
         
-        const constraints = this.getConstraints();
+        const constraints = this.getWebViewCompatibleConstraints();
+        console.log('📋 Camera constraints:', JSON.stringify(constraints, null, 2));
         
-        // Use the polyfilled or native getUserMedia
-        this.currentStream = await navigator.mediaDevices.getUserMedia(constraints);
+        // Add timeout for WebView debugging with longer timeout
+        const timeoutDuration = this.isWebView() ? 20000 : 10000; // 20s for WebView, 10s for browser
+        const getUserMediaPromise = navigator.mediaDevices.getUserMedia(constraints);
+        const timeoutPromise = new Promise((_, reject) => {
+          setTimeout(() => reject(new Error(`getUserMedia timeout after ${timeoutDuration/1000} seconds`)), timeoutDuration);
+        });
+        
+        console.log('⏳ Requesting camera access...');
+        this.currentStream = await Promise.race([getUserMediaPromise, timeoutPromise]);
+        console.log('✅ Camera stream obtained');
         
         // Set up video element
         const video = this.$refs.videoElement;
@@ -325,41 +526,56 @@ export default {
         
         // Get track info
         this.currentTrack = this.currentStream.getVideoTracks()[0];
+        console.log('📹 Video track:', this.currentTrack.label || 'No label');
+        console.log('📊 Track settings:', this.currentTrack.getSettings ? this.currentTrack.getSettings() : 'N/A');
+        
         this.currentCameraLabel = this.getCurrentCameraLabel();
         
         // Get capabilities (with error handling)
         try {
           if (this.currentTrack.getCapabilities) {
             this.currentCapabilities = this.currentTrack.getCapabilities();
+            console.log('🔧 Camera capabilities:', this.currentCapabilities);
           }
         } catch (capError) {
-          console.warn('Could not get camera capabilities:', capError);
+          console.warn('⚠️ Could not get camera capabilities:', capError);
           this.currentCapabilities = null;
         }
         
-        // Wait for video to load
-        await new Promise((resolve) => {
-          video.addEventListener('loadedmetadata', resolve, { once: true });
+        // Wait for video to load with timeout
+        console.log('⏱️ Waiting for video metadata...');
+        await new Promise((resolve, reject) => {
+          const timeout = setTimeout(() => {
+            reject(new Error('Video metadata timeout'));
+          }, 10000);
+          
+          video.addEventListener('loadedmetadata', () => {
+            clearTimeout(timeout);
+            resolve();
+          }, { once: true });
         });
+        console.log('📺 Video metadata loaded');
         
         // Update resolution info
         this.updateResolutionInfo();
+        console.log('📐 Final resolution:', this.currentResolution);
         
         // Start FPS monitoring
         this.startFpsMonitoring();
         
         this.isCameraActive = true;
+        console.log('🎉 Camera started successfully');
         
         // Re-enumerate devices to get updated labels (with error handling)
         try {
           await this.enumerateDevices();
         } catch (enumError) {
-          console.warn('Could not re-enumerate devices:', enumError);
+          console.warn('⚠️ Could not re-enumerate devices:', enumError);
         }
         
       } catch (error) {
-        console.error('Error starting camera:', error);
-        this.handleCameraError(error);
+        console.error('❌ Error starting camera:', error);
+        this.handleCameraErrorWithWebViewSupport(error);
       } finally {
         this.isLoading = false;
       }
@@ -406,31 +622,9 @@ export default {
     },
     
     getConstraints() {
-      const constraints = {
-        video: {}
-      };
-      
-      // Only add deviceId constraint if it's not 'default'
-      if (this.selectedCameraId && this.selectedCameraId !== 'default') {
-        constraints.video.deviceId = { exact: this.selectedCameraId };
-      }
-      
-      // Apply resolution constraints
-      if (this.selectedResolution !== 'auto') {
-        const resolutions = {
-          '480p': { width: 640, height: 480 },
-          '720p': { width: 1280, height: 720 },
-          '1080p': { width: 1920, height: 1080 }
-        };
-        
-        const resolution = resolutions[this.selectedResolution];
-        if (resolution) {
-          constraints.video.width = { ideal: resolution.width };
-          constraints.video.height = { ideal: resolution.height };
-        }
-      }
-      
-      return constraints;
+      // This method is now replaced by getWebViewCompatibleConstraints()
+      // Keep for backward compatibility
+      return this.getWebViewCompatibleConstraints();
     },
     
     getCurrentCameraLabel() {
@@ -500,6 +694,15 @@ export default {
         }
       }
       return String(range);
+    },
+    
+    isWebView() {
+      const userAgent = navigator.userAgent || '';
+      // Check for common WebView indicators
+      return userAgent.includes('wv') || // Android WebView
+             userAgent.includes('Version/') && userAgent.includes('Mobile Safari') && !userAgent.includes('CriOS') || // iOS WebView
+             window.chrome && !window.chrome.app || // Chrome WebView
+             typeof window.orientation !== 'undefined' && !window.MSStream; // Mobile device check
     },
     
     formatCapabilityName(key) {
