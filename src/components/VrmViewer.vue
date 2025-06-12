@@ -36,6 +36,14 @@ onMounted(() => {
 });
 
 onBeforeUnmount(() => {
+  // Clean up event listeners
+  window.removeEventListener('resize', handleResize);
+  window.removeEventListener('orientationchange', handleOrientationChange);
+  
+  // Clear any pending timeouts
+  clearTimeout(resizeTimeout);
+  clearTimeout(orientationChangeTimeout);
+  
   // Clean up Three.js resources
   if (renderer) {
     renderer.dispose();
@@ -86,16 +94,77 @@ function initThree() {
   };
   animate();
 
-  // Handle window resize
-  window.addEventListener('resize', onWindowResize);
-  onWindowResize();
+  // Handle window resize with orientation change support
+  window.addEventListener('resize', handleResize);
+  window.addEventListener('orientationchange', handleOrientationChange);
+  
+  // Initial resize
+  setTimeout(() => {
+    onWindowResize();
+  }, 100);
+}
+
+let resizeTimeout;
+let orientationChangeTimeout;
+
+function handleResize() {
+  // Debounce resize events to avoid excessive calls
+  clearTimeout(resizeTimeout);
+  resizeTimeout = setTimeout(() => {
+    onWindowResize();
+  }, 100);
+}
+
+function handleOrientationChange() {
+  // Handle orientation changes with longer delay to ensure DOM is ready
+  clearTimeout(orientationChangeTimeout);
+  orientationChangeTimeout = setTimeout(() => {
+    // Force a complete recalculation after orientation change
+    if (canvasContainer.value) {
+      // Temporarily force container to recalculate its size
+      const container = canvasContainer.value;
+      const currentDisplay = container.style.display;
+      container.style.display = 'none';
+      container.offsetHeight; // Trigger reflow
+      container.style.display = currentDisplay;
+      
+      // Now resize with the new dimensions
+      setTimeout(() => {
+        onWindowResize();
+      }, 50);
+    }
+  }, 500); // Longer delay for orientation changes
 }
 
 function onWindowResize() {
-  if (camera && renderer && canvasContainer.value && canvasContainer.value.clientWidth > 0 && canvasContainer.value.clientHeight > 0) {
-    camera.aspect = canvasContainer.value.clientWidth / canvasContainer.value.clientHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(canvasContainer.value.clientWidth, canvasContainer.value.clientHeight);
+  if (!camera || !renderer || !canvasContainer.value) {
+    return;
+  }
+  
+  const container = canvasContainer.value;
+  const width = container.clientWidth;
+  const height = container.clientHeight;
+  
+  // Ensure we have valid dimensions
+  if (width <= 0 || height <= 0) {
+    // Retry after a short delay if dimensions aren't ready
+    setTimeout(() => {
+      onWindowResize();
+    }, 100);
+    return;
+  }
+  
+  // Update camera aspect ratio
+  camera.aspect = width / height;
+  camera.updateProjectionMatrix();
+  
+  // Update renderer size
+  renderer.setSize(width, height);
+  renderer.setPixelRatio(window.devicePixelRatio);
+  
+  // Force a render to apply changes immediately
+  if (currentVrm && scene) {
+    renderer.render(scene, camera);
   }
 }
 
@@ -280,6 +349,18 @@ function raiseRightArmForward() {
   // const leftUpperArm = getBone(VRMHumanBoneName.LeftUpperArm);
   // if (leftUpperArm) leftUpperArm.rotation.set(0, 0, -Math.PI / 2); // Put left arm down
 }
+
+// Force a complete resize recalculation (useful for debugging orientation issues)
+function forceResize() {
+  setTimeout(() => {
+    onWindowResize();
+  }, 100);
+}
+
+// Expose forceResize for debugging purposes (can be called from browser console)
+if (typeof window !== 'undefined') {
+  window.vrmForceResize = forceResize;
+}
 </script>
 
 <style scoped>
@@ -287,7 +368,10 @@ function raiseRightArmForward() {
   display: flex;
   flex-direction: column;
   width: 100%;
-  height: 500px; /* Adjust as needed, or e.g., 100vh */
+  height: 100vh; /* Use full viewport height for better mobile support */
+  max-height: 100vh;
+  min-height: 400px; /* Minimum height fallback */
+  position: relative;
 }
 
 .canvas-area { /* ADDED: Style for the canvas container */
@@ -296,30 +380,100 @@ function raiseRightArmForward() {
   min-height: 0; /* Important for flex children */
   position: relative; /* If canvas inside needs absolute positioning */
   overflow: hidden; /* ADDED: Prevent content from spilling out and overlapping siblings */
+  transition: all 0.3s ease; /* Smooth transition during orientation changes */
 }
 
 .ui-panel { /* ADDED: New panel for all UI controls */
   flex-shrink: 0; /* Do not allow this panel to shrink */
   overflow-y: auto; /* Allow vertical scrolling if content is too tall */
-  max-height: 50%; 
+  max-height: 200px; /* Fixed height for controls */
+  min-height: 120px; /* Minimum height for controls */
   padding: 10px; 
   box-sizing: border-box;
+  background: #f8f9fa;
+  border-top: 1px solid #dee2e6;
 }
 
 .controls {
-  background: #f8f9fa;
-  padding: 15px;
+  background: transparent;
+  padding: 10px;
   border-radius: 8px;
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 8px;
   justify-content: center;
-  flex-shrink: 0;
-  border-top: 1px solid #dee2e6;
-  box-shadow: 0 -2px 5px rgba(0,0,0,0.05);
   width: 100%;
   box-sizing: border-box;
-  /* margin-top: 10px; */ /* Removed as TTS container is gone, direct child of ui-panel now */
+}
+
+/* Mobile and orientation-specific optimizations */
+@media (max-width: 768px) {
+  .vrm-viewer-container {
+    height: 100vh;
+    height: 100dvh; /* Use dynamic viewport height if supported */
+  }
+  
+  .ui-panel {
+    max-height: 150px;
+    min-height: 100px;
+    padding: 8px;
+  }
+  
+  .controls {
+    gap: 6px;
+    padding: 5px;
+  }
+  
+  .controls button {
+    padding: 6px 12px;
+    font-size: 12px;
+    flex: 1;
+    min-width: 80px;
+    max-width: 120px;
+  }
+}
+
+/* Landscape orientation optimizations */
+@media (max-width: 768px) and (orientation: landscape) {
+  .vrm-viewer-container {
+    height: 100vh;
+    height: 100dvh;
+  }
+  
+  .ui-panel {
+    max-height: 120px;
+    min-height: 80px;
+  }
+  
+  .controls {
+    padding: 3px;
+    gap: 4px;
+  }
+  
+  .controls button {
+    padding: 4px 8px;
+    font-size: 11px;
+    min-width: 70px;
+    max-width: 100px;
+  }
+}
+
+/* Portrait orientation optimizations */
+@media (max-width: 768px) and (orientation: portrait) {
+  .vrm-viewer-container {
+    height: 100vh;
+    height: 100dvh;
+  }
+  
+  .canvas-area {
+    /* Give more space to the 3D view in portrait mode */
+    flex-grow: 2;
+  }
+  
+  .ui-panel {
+    max-height: 180px;
+    min-height: 120px;
+  }
 }
 
 .controls button {
@@ -332,6 +486,8 @@ function raiseRightArmForward() {
   cursor: pointer;
   transition: background-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  -webkit-tap-highlight-color: transparent; /* Remove tap highlight on mobile */
+  touch-action: manipulation; /* Improve touch responsiveness */
 }
 
 .controls button:hover {
@@ -342,6 +498,7 @@ function raiseRightArmForward() {
 .controls button:active {
   background-color: #004085;
   box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+  transform: translateY(1px); /* Subtle press effect */
 }
 
 </style>
