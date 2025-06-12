@@ -117,58 +117,204 @@ function handleResize() {
 }
 
 function handleOrientationChange() {
-  // Handle orientation changes with more aggressive approach
+  console.log('Orientation change detected');
+  
+  // Clear any existing timeouts
   clearTimeout(orientationChangeTimeout);
   
-  // First attempt - immediate but gentle
+  // Immediate response - try to prevent display corruption
   setTimeout(() => {
     attemptResize('immediate');
-  }, 100);
+  }, 50);
   
-  // Second attempt - more aggressive after DOM settles
-  orientationChangeTimeout = setTimeout(() => {
-    attemptResize('delayed');
-  }, 800);
-  
-  // Final attempt - most aggressive for stubborn cases
+  // Early attempt - after initial DOM adjustment
   setTimeout(() => {
-    attemptResize('final');
+    attemptResize('early');
+  }, 300);
+  
+  // Main attempt - after viewport stabilizes
+  orientationChangeTimeout = setTimeout(() => {
+    attemptResize('main');
+  }, 600);
+  
+  // Aggressive attempt - force complete recalculation
+  setTimeout(() => {
+    attemptResize('aggressive');
+  }, 1000);
+  
+  // Final desperate attempt - nuclear option
+  setTimeout(() => {
+    attemptResize('nuclear');
   }, 1500);
 }
 
 function attemptResize(phase) {
   console.log(`VRM resize attempt: ${phase}`);
   
-  if (!canvasContainer.value) {
-    console.warn(`VRM resize ${phase}: no container`);
+  if (!canvasContainer.value || !renderer || !camera) {
+    console.warn(`VRM resize ${phase}: missing required components`);
     return;
   }
   
   const container = canvasContainer.value;
   
-  if (phase === 'delayed' || phase === 'final') {
-    // Force complete DOM recalculation
-    const parent = container.parentElement;
-    if (parent) {
-      // Force parent container to recalculate
-      parent.style.height = parent.style.height || '';
-      parent.offsetHeight; // Trigger reflow
+  // Different strategies based on phase
+  if (phase === 'aggressive' || phase === 'nuclear') {
+    // Force complete DOM and canvas reset
+    forceDOMReset(phase);
+  } else if (phase === 'main' || phase === 'early') {
+    // Standard DOM refresh
+    refreshDOMLayout();
+  }
+  
+  // Wait for DOM to settle, then resize
+  setTimeout(() => {
+    performResize(phase);
+  }, phase === 'nuclear' ? 100 : 50);
+}
+
+// New function for aggressive DOM reset
+function forceDOMReset(phase) {
+  console.log(`VRM DOM reset: ${phase}`);
+  
+  const container = canvasContainer.value;
+  const parent = container.parentElement;
+  const canvas = container.querySelector('canvas');
+  
+  if (phase === 'nuclear') {
+    // Nuclear option: completely recreate the canvas
+    if (canvas) {
+      canvas.remove();
     }
     
-    // Force container recalculation
-    container.style.display = 'none';
-    container.style.width = '';
-    container.style.height = '';
-    container.offsetHeight; // Trigger reflow
-    container.style.display = '';
+    // Reset container styles completely
+    container.style.cssText = '';
+    container.className = 'canvas-area';
     
-    // Wait for reflow to complete
-    setTimeout(() => {
-      forceRendererResize(phase);
-    }, 50);
+    // Force parent container reset
+    if (parent) {
+      parent.style.display = 'none';
+      parent.offsetHeight; // Force reflow
+      parent.style.display = '';
+      parent.offsetHeight; // Force another reflow
+    }
+    
+    // Force container reset
+    container.style.display = 'none';
+    container.offsetHeight; // Force reflow
+    container.style.display = '';
+    container.offsetHeight; // Force reflow
+    
+    // Re-append canvas to container
+    if (renderer && renderer.domElement) {
+      container.appendChild(renderer.domElement);
+    }
   } else {
-    forceRendererResize(phase);
+    // Less aggressive reset
+    refreshDOMLayout();
   }
+}
+
+// New function for standard DOM refresh
+function refreshDOMLayout() {
+  const container = canvasContainer.value;
+  const parent = container.parentElement;
+  
+  // Force parent recalculation
+  if (parent) {
+    const originalDisplay = parent.style.display;
+    parent.style.display = 'none';
+    parent.offsetHeight; // Trigger reflow
+    parent.style.display = originalDisplay || '';
+  }
+  
+  // Force container recalculation
+  const originalDisplay = container.style.display;
+  container.style.display = 'none';
+  container.style.width = '';
+  container.style.height = '';
+  container.offsetHeight; // Trigger reflow
+  container.style.display = originalDisplay || '';
+}
+
+// Enhanced performResize function
+function performResize(phase) {
+  if (!camera || !renderer || !canvasContainer.value) {
+    console.warn(`VRM resize ${phase}: missing components during perform`);
+    return;
+  }
+  
+  const container = canvasContainer.value;
+  let width = container.clientWidth;
+  let height = container.clientHeight;
+  
+  console.log(`VRM resize ${phase}: initial container dimensions ${width}x${height}`);
+  
+  // Multiple fallback strategies for getting dimensions
+  if (width <= 0 || height <= 0) {
+    // Try getBoundingClientRect
+    const rect = container.getBoundingClientRect();
+    width = rect.width;
+    height = rect.height;
+    console.log(`VRM resize ${phase}: using getBoundingClientRect ${width}x${height}`);
+  }
+  
+  if (width <= 0 || height <= 0) {
+    // Try parent dimensions
+    const parent = container.parentElement;
+    if (parent) {
+      width = parent.clientWidth;
+      height = parent.clientHeight;
+      console.log(`VRM resize ${phase}: using parent dimensions ${width}x${height}`);
+    }
+  }
+  
+  if (width <= 0 || height <= 0) {
+    // Last resort: viewport dimensions
+    width = window.innerWidth;
+    height = window.innerHeight;
+    console.log(`VRM resize ${phase}: using viewport fallback ${width}x${height}`);
+  }
+  
+  // For mobile portrait, account for UI panel
+  const isPortrait = height > width;
+  if (isPortrait && window.innerWidth <= 768) {
+    const uiPanel = document.querySelector('.ui-panel');
+    if (uiPanel) {
+      const uiHeight = uiPanel.getBoundingClientRect().height;
+      height = Math.max(200, height - uiHeight - 20); // 20px buffer
+      console.log(`VRM resize ${phase}: adjusted for mobile portrait UI, new height ${height}`);
+    }
+  }
+  
+  // Ensure minimum dimensions
+  width = Math.max(200, width);
+  height = Math.max(200, height);
+  
+  // Update camera
+  const newAspect = width / height;
+  camera.aspect = newAspect;
+  camera.updateProjectionMatrix();
+  
+  // Update renderer with pixel ratio consideration
+  renderer.setSize(width, height);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // Cap at 2 for performance
+  
+  // Force canvas size
+  const canvas = renderer.domElement;
+  if (canvas) {
+    canvas.style.width = width + 'px';
+    canvas.style.height = height + 'px';
+    canvas.width = width * renderer.getPixelRatio();
+    canvas.height = height * renderer.getPixelRatio();
+  }
+  
+  // Force immediate render
+  if (currentVrm && scene) {
+    renderer.render(scene, camera);
+  }
+  
+  console.log(`VRM resize ${phase}: completed ${width}x${height}, aspect ${newAspect.toFixed(3)}`);
 }
 
 function forceRendererResize(phase) {
@@ -435,8 +581,15 @@ function raiseRightArmForward() {
 
 // Force a complete resize recalculation (useful for debugging orientation issues)
 function forceResize() {
-  console.log('VRM force resize triggered');
-  attemptResize('manual');
+  console.log('VRM manual force resize triggered');
+  
+  // Use the nuclear option for manual resize
+  attemptResize('nuclear');
+  
+  // Also try a follow-up resize after a brief delay
+  setTimeout(() => {
+    attemptResize('followup');
+  }, 500);
 }
 
 // Expose forceResize for debugging purposes (can be called from browser console)
@@ -446,43 +599,83 @@ if (typeof window !== 'undefined') {
 </script>
 
 <style scoped>
-.vrm-viewer-container { /* MODIFIED: Was generic 'div' */
+.vrm-viewer-container {
   display: flex;
   flex-direction: column;
   width: 100%;
-  height: 100vh; /* Use full viewport height for better mobile support */
-  height: 100dvh; /* Use dynamic viewport height if supported */
+  height: 100vh;
+  height: 100dvh;
   max-height: 100vh;
   max-height: 100dvh;
-  min-height: 400px; /* Minimum height fallback */
+  min-height: 400px;
   position: relative;
-  overflow: hidden; /* Prevent any overflow during transitions */
+  overflow: hidden;
+  /* Force hardware acceleration */
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
 }
 
-.canvas-area { /* ADDED: Style for the canvas container */
+.canvas-area {
   flex-grow: 1;
   flex-shrink: 1;
   width: 100%;
-  min-height: 0; /* Important for flex children */
-  position: relative; /* If canvas inside needs absolute positioning */
-  overflow: hidden; /* ADDED: Prevent content from spilling out and overlapping siblings */
-  transition: none; /* Remove transitions that might interfere with orientation changes */
-  background: #f0f0f0; /* Add background to help debug sizing issues */
+  min-height: 0;
+  position: relative;
+  overflow: hidden;
+  background: #f0f0f0;
+  /* Ensure proper rendering during transitions */
+  contain: layout style paint;
+  /* Force hardware acceleration */
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
 }
 
-/* Force canvas to fill container properly */
 .canvas-area canvas {
-  display: block;
+  display: block !important;
   width: 100% !important;
   height: 100% !important;
   object-fit: contain;
+  /* Prevent canvas from interfering with layout */
+  position: absolute;
+  top: 0;
+  left: 0;
+  /* Force hardware acceleration */
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
 }
 
-.ui-panel { /* ADDED: New panel for all UI controls */
-  flex-shrink: 0; /* Do not allow this panel to shrink */
-  overflow-y: auto; /* Allow vertical scrolling if content is too tall */
-  max-height: 200px; /* Fixed height for controls */
-  min-height: 120px; /* Minimum height for controls */
+/* Critical: Handle orientation changes more aggressively */
+@media (orientation: portrait) {
+  .vrm-viewer-container {
+    height: 100vh !important;
+    height: 100dvh !important;
+  }
+  
+  .canvas-area {
+    /* Force recalculation on orientation change */
+    width: 100vw;
+    max-width: 100%;
+  }
+}
+
+@media (orientation: landscape) {
+  .vrm-viewer-container {
+    height: 100vh !important;
+    height: 100dvh !important;
+  }
+  
+  .canvas-area {
+    /* Force recalculation on orientation change */
+    width: 100vw;
+    max-width: 100%;
+  }
+}
+
+.ui-panel {
+  flex-shrink: 0;
+  overflow-y: auto;
+  max-height: 200px;
+  min-height: 120px;
   padding: 10px; 
   box-sizing: border-box;
   background: #f8f9fa;
@@ -505,21 +698,20 @@ if (typeof window !== 'undefined') {
 @media (max-width: 768px) {
   .vrm-viewer-container {
     height: 100vh;
-    height: 100dvh; /* Use dynamic viewport height if supported */
-    min-height: unset; /* Remove min-height on mobile */
+    height: 100dvh;
+    min-height: unset;
   }
   
   .canvas-area {
-    /* Ensure canvas area takes priority on mobile */
     flex-basis: 0;
-    min-height: 200px; /* Minimum canvas height */
+    min-height: 200px;
   }
   
   .ui-panel {
     max-height: 150px;
     min-height: 100px;
     padding: 8px;
-    flex-shrink: 0; /* Prevent UI panel from shrinking too much */
+    flex-shrink: 0;
   }
   
   .controls {
@@ -536,40 +728,7 @@ if (typeof window !== 'undefined') {
   }
 }
 
-/* Landscape orientation optimizations */
-@media (max-width: 768px) and (orientation: landscape) {
-  .vrm-viewer-container {
-    height: 100vh !important;
-    height: 100dvh !important;
-    max-height: 100vh !important;
-    max-height: 100dvh !important;
-  }
-  
-  .canvas-area {
-    flex-grow: 3; /* Give more space to canvas in landscape */
-    min-height: 150px;
-  }
-  
-  .ui-panel {
-    max-height: 100px !important;
-    min-height: 60px !important;
-    flex-shrink: 0;
-  }
-  
-  .controls {
-    padding: 2px;
-    gap: 3px;
-  }
-  
-  .controls button {
-    padding: 3px 6px;
-    font-size: 10px;
-    min-width: 60px;
-    max-width: 90px;
-  }
-}
-
-/* Portrait orientation optimizations */
+/* Enhanced mobile portrait */
 @media (max-width: 768px) and (orientation: portrait) {
   .vrm-viewer-container {
     height: 100vh !important;
@@ -579,16 +738,18 @@ if (typeof window !== 'undefined') {
   }
   
   .canvas-area {
-    /* Give substantial space to canvas in portrait */
-    flex-grow: 4;
-    flex-basis: 0;
+    flex-grow: 1;
+    flex-basis: calc(100vh - 160px);
     min-height: 300px;
+    max-height: calc(100vh - 160px);
   }
   
   .ui-panel {
+    height: 160px !important;
     max-height: 160px !important;
-    min-height: 100px !important;
+    min-height: 160px !important;
     flex-shrink: 0;
+    flex-grow: 0;
   }
   
   .controls {
@@ -601,6 +762,43 @@ if (typeof window !== 'undefined') {
     font-size: 11px;
     min-width: 70px;
     max-width: 110px;
+  }
+}
+
+/* Enhanced mobile landscape */
+@media (max-width: 768px) and (orientation: landscape) {
+  .vrm-viewer-container {
+    height: 100vh !important;
+    height: 100dvh !important;
+    max-height: 100vh !important;
+    max-height: 100dvh !important;
+  }
+  
+  .canvas-area {
+    flex-grow: 1;
+    flex-basis: calc(100vh - 100px);
+    min-height: 150px;
+    max-height: calc(100vh - 100px);
+  }
+  
+  .ui-panel {
+    height: 100px !important;
+    max-height: 100px !important;
+    min-height: 100px !important;
+    flex-shrink: 0;
+    flex-grow: 0;
+  }
+  
+  .controls {
+    padding: 2px;
+    gap: 3px;
+  }
+  
+  .controls button {
+    padding: 3px 6px;
+    font-size: 10px;
+    min-width: 60px;
+    max-width: 90px;
   }
 }
 
