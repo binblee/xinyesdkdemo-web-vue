@@ -4,6 +4,7 @@
     <VrmViewer v-if="currentView === 'vrm'" />
     <PrintView v-if="currentView === 'print'" />
     <XunfeiTtsDemo v-if="currentView === 'tts'" />
+    <CameraTestDemo v-if="currentView === 'camera'" />
   </div>
 </template>
 
@@ -11,6 +12,7 @@
 import PrintView from './PrintView.vue'
 import VrmViewer from './VrmViewer.vue';
 import XunfeiTtsDemo from './XunfeiTtsDemo.vue';
+import CameraTestDemo from './CameraTestDemo.vue';
 
 defineProps({
   currentView: String

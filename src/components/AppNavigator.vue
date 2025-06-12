@@ -2,7 +2,8 @@
   <div class="app-navigator">
     <button @click="navigateTo('vrm')">VRM Viewer</button>
     <button @click="navigateTo('print')">Print View</button>
-    <button @click="navigateTo('tts')">Xunfei TTS Demo</button> <!-- Added this line -->
+    <button @click="navigateTo('tts')">Xunfei TTS Demo</button>
+    <button @click="navigateTo('camera')">Camera Test Demo</button>
   </div>
 </template>
 
