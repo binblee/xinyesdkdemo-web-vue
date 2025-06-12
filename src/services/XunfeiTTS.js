@@ -3,11 +3,15 @@ import axios from 'axios'
 
 // Instead of hardcoding, read config from environment variables or a global config object
 const config = {
-  appId: import.meta.env.VITE_XUNFEI_APP_ID || window.XUNFEI_APP_ID || '',
-  ttsUrl: 'wss://tts-api.xfyun.cn/v2/tts',
-}
+    appId: import.meta.env.VITE_XUNFEI_APP_ID || window.XUNFEI_APP_ID || '',
+    apiKey: import.meta.env.VITE_XUNFEI_API_KEY || window.XUNFEI_API_KEY || '',
+    apiSecret: import.meta.env.VITE_XUNFEI_API_SECRET || window.XUNFEI_API_SECRET || '',
+    ttsUrl: 'wss://tts-api.xfyun.cn/v2/tts',
+};
 
-// 生成鉴权签名
+// 生成鉴权签名，直联方式使用
+// 该函数在客户端生成鉴权字符串，可能会暴露 apiSecret，
+// 仅在不使用代理的情况下使用，建议在服务端生成 authStr
 function getAuthString(method, path) {
   const date = new Date().toGMTString()
   const host = 'tts-api.xfyun.cn'
