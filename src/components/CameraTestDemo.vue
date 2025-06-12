@@ -150,9 +150,6 @@
           <button @click="testAndroidBridge" class="btn btn-secondary" v-if="androidInterfaceAvailable.includes('✅')">
             📱 Test Android Bridge
           </button>
-          <button @click="exportDebugLog" class="btn btn-secondary">
-            📋 Export Debug Log
-          </button>
           <button @click="clearDebugLog" class="btn btn-outline">
             🗑️ Clear Log
           </button>
@@ -433,29 +430,6 @@ export default {
       } else {
         this.addDebugLog('❌ Android bridge not available', 'error');
       }
-    },
-
-    exportDebugLog() {
-      const logData = {
-        timestamp: new Date().toISOString(),
-        userAgent: navigator.userAgent,
-        debugInfo: this.getWebViewDebugInfo(),
-        logs: this.debugLog
-      };
-      
-      const dataStr = JSON.stringify(logData, null, 2);
-      const blob = new Blob([dataStr], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `webview-camera-debug-${Date.now()}.json`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-      
-      this.addDebugLog('📋 Debug log exported successfully', 'success');
     },
 
     clearDebugLog() {
