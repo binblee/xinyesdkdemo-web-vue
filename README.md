@@ -71,9 +71,10 @@ TBD
 
 目前使用免费的账号，实测只能说很短的句子，选择有限的几个发音人（音库）。
 
-讯飞TTS对于websocket调用没有CORS限制。调用textToSpeech()参数`useProxy`设置为`false`即可。
+在本地用http页面测试，讯飞TTS对于websocket调用没有CORS限制。调用textToSpeech()参数`useProxy`设置为`false`即可。
+在HTTPS页面测试又CORS限制，必须启用proxy。
 
-如果希望使用proxy，则需要在另外的窗口启动proxy：
+在本地启用proxy：需要在另外的窗口启动proxy：
 
 ```bash
 node xunfei-proxy.js
@@ -81,4 +82,4 @@ node xunfei-proxy.js
 
 proxy侦听在3001端口，vite-config.js中已配置好。
 
-
+在cloudflare中，`src/worker.js` 用于cloudflare worker作为proxy转发语音合成请求。
