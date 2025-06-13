@@ -1,5 +1,8 @@
 <template>
   <div class="tts-container">
+    <!-- Back Button -->
+    <BackButton />
+    
     <h2>讯飞语音合成演示</h2>
     
     <div class="input-area">
@@ -55,9 +58,13 @@
 
 <script>
 import { textToSpeech, getVoiceList } from '../services/XunfeiTTS'
+import BackButton from './BackButton.vue'
 
 export default {
   name: 'XunfeiTTS',
+  components: {
+    BackButton
+  },
   data() {
     return {
       inputText: '你好',

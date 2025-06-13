@@ -11,10 +11,12 @@
 </template>
 
 <script setup>
-const emit = defineEmits(['navigate']);
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
 
 function navigateTo(view) {
-  emit('navigate', view);
+  router.push(`/${view}`)
 }
 </script>
 

@@ -1,5 +1,8 @@
 <template>
   <div class="vrm-viewer-container">
+    <!-- Back Button -->
+    <BackButton />
+    
     <!-- Avatar -->
     <div ref="canvasContainer" class="canvas-area"></div>
 
@@ -26,6 +29,7 @@ import { ref, onMounted, onBeforeUnmount } from 'vue';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { VRMLoaderPlugin, VRMUtils, VRMExpressionPresetName, VRMHumanBoneName } from '@pixiv/three-vrm';
+import BackButton from './BackButton.vue';
 
 const canvasContainer = ref(null);
 let scene, camera, renderer, clock, currentVrm;

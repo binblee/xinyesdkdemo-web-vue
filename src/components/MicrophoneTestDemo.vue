@@ -1,5 +1,8 @@
 <template>
   <div class="microphone-test-demo">
+    <!-- Back Button -->
+    <BackButton />
+    
     <div class="header">
       <h2>🎤 麦克风测试演示</h2>
       <p>测试麦克风访问、录音和音频质量</p>
@@ -88,8 +91,13 @@
 </template>
 
 <script>
+import BackButton from './BackButton.vue'
+
 export default {
   name: 'MicrophoneTestDemo',
+  components: {
+    BackButton
+  },
   data() {
     return {
       // Audio state

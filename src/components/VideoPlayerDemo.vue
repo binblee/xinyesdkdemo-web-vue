@@ -1,5 +1,8 @@
 <template>
   <div class="video-player-container">
+    <!-- Back Button -->
+    <BackButton />
+    
     <!-- Header -->
     <div class="header">
       <h2>🎬 视频播放演示</h2>
@@ -182,6 +185,7 @@
 
 <script setup>
 import { ref, reactive, computed, onMounted, onBeforeUnmount, nextTick } from 'vue';
+import BackButton from './BackButton.vue';
 
 // Props
 const props = defineProps({

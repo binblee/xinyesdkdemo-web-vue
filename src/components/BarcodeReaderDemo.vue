@@ -1,5 +1,8 @@
 <template>
   <div class="barcode-reader-container">
+    <!-- Back Button -->
+    <BackButton />
+    
     <!-- Header -->
     <div class="header">
       <h2>📱 扫码器测试</h2>
@@ -96,6 +99,7 @@
 
 <script setup>
 import { ref, reactive, onMounted, onBeforeUnmount, computed, nextTick } from 'vue';
+import BackButton from './BackButton.vue';
 
 // Scanner Detection Class
 class NoInputFieldScannerDetector {

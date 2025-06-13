@@ -1,5 +1,8 @@
 <template>
   <div class="camera-test-demo">
+    <!-- Back Button -->
+    <BackButton />
+    
     <div class="header">
       <h2>📹 摄像头测试演示</h2>
       <p>基本摄像头访问、预览和设备测试</p>
@@ -197,8 +200,13 @@
 </template>
 
 <script>
+import BackButton from './BackButton.vue'
+
 export default {
   name: 'CameraTestDemo',
+  components: {
+    BackButton
+  },
   data() {
     return {
       // Camera state

@@ -1,5 +1,8 @@
 <template>
 	<view class="container">
+		<!-- Back Button -->
+		<BackButton />
+		
 		<view class="section">
 			<text class="section-title">原生桥接通信</text>
 			<button @click="handleShowNativeToast" class="action-btn">显示Toast</button>
@@ -43,8 +46,12 @@ import {
 } from '@/utils/nativeBridge.js';
 
 import {TSPLConst, JSPrinterBridge} from '@/utils/JSPrinterBridge.js';
+import BackButton from './BackButton.vue';
 
 export default {
+	components: {
+		BackButton
+	},
 	data() {
         return {
             printerStatus: null,

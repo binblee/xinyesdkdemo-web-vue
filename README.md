@@ -10,9 +10,10 @@
 
 ## 目录结构
 
-导航页面：
-- `src/components/AppNavigator.vue`
-- `src/components/ViewManager.vue`
+导航与路由：
+- `src/router/index.js`：Vue Router 路由配置
+- `src/components/AppNavigator.vue`：主导航页面
+- `src/components/BackButton.vue`：通用返回按钮组件
 
 芯烨打印机：
 - `src/utils/JSPrinterBridge.js`：封装与新烨打印 SDK 的 JS 桥接方法。
@@ -28,8 +29,13 @@ VRoid数字人：
 讯飞TTS：
 - `src/services/XunfeiTTS.js`：封装讯飞TTS API调用细节
 - `src/components/XunfeiTtsDemo.vue`：讯飞TTS演示页面
-- `xunfei-proxy.js`：后端Proxy，如果讯飞对Web API调用CORS限制，可以使用这个proxy
 
+多媒体测试组件：
+- `src/components/CameraTestDemo.vue`：摄像头测试页面
+- `src/components/MicrophoneTestDemo.vue`：麦克风测试页面
+- `src/components/BarcodeReaderDemo.vue`：条码扫描器测试页面
+- `src/components/VideoPlayerDemo.vue`：视频播放器演示页面
+- `xunfei-proxy.js`：后端Proxy，如果讯飞对Web API调用CORS限制，可以使用这个proxy
 
 ## 打印机SDK集成
 

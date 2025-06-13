@@ -1,29 +1,11 @@
 <script setup>
-import { ref } from 'vue';
-import AppNavigator from './components/AppNavigator.vue';
-import ViewManager from './components/ViewManager.vue';
-
-const activeComponent = ref('AppNavigator'); // Can be 'AppNavigator', 'VrmViewer', 'PrintView'
-const currentViewForManager = ref(''); // To pass to ViewManager, e.g., 'vrm' or 'print'
-
-function handleNavigation(view) {
-  currentViewForManager.value = view; // e.g., 'vrm' or 'print'
-  activeComponent.value = 'ViewManager'; // Switch to showing ViewManager
-}
-
-function handleGoBack() {
-  activeComponent.value = 'AppNavigator'; // Switch back to showing AppNavigator
-  currentViewForManager.value = ''; // Reset the view for manager
-}
+// App.vue now simply provides the router outlet
+// All navigation logic is handled by Vue Router
 </script>
 
 <template>
-  <AppNavigator v-if="activeComponent === 'AppNavigator'" @navigate="handleNavigation" />
-  <ViewManager 
-    v-if="activeComponent === 'ViewManager'" 
-    :currentView="currentViewForManager" 
-    @goBack="handleGoBack" 
-  />
+  <!-- Router View - this will display the current route component -->
+  <router-view />
 </template>
 
 <style scoped>

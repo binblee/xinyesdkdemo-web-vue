@@ -19,6 +19,7 @@
     "express": "^5.1.0",
     "three": "^0.177.0",
     "vue": "^3.5.13",
+    "vue-router": "^4.5.1",
     "wrangler": "^4.19.1"
   },
   "devDependencies": {
