@@ -5,6 +5,7 @@
     <button @click="navigateTo('tts')">Xunfei TTS Demo</button>
     <button @click="navigateTo('camera')">Camera Test Demo</button>
     <button @click="navigateTo('microphone')">Microphone Test Demo</button>
+    <button @click="navigateTo('barcode')">Barcode Reader Demo</button>
   </div>
 </template>
 
