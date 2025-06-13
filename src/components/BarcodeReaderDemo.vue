@@ -517,6 +517,9 @@ onBeforeUnmount(() => {
   background: #f8f9fa;
   border-radius: 8px;
   border-left: 4px solid #28a745;
+  max-width: 100%;
+  overflow: hidden;
+  box-sizing: border-box;
 }
 
 .scanned-code {
@@ -525,6 +528,10 @@ onBeforeUnmount(() => {
   font-family: 'Courier New', monospace;
   margin-bottom: 10px;
   word-break: break-all;
+  overflow-wrap: break-word;
+  hyphens: auto;
+  max-width: 100%;
+  line-height: 1.3;
   color: #2c3e50;
 }
 
@@ -735,6 +742,37 @@ onBeforeUnmount(() => {
     padding: 15px;
   }
   
+  .scan-result {
+    padding: 15px;
+    margin: 0;
+  }
+  
+  .scanned-code {
+    font-size: 1.1rem;
+    line-height: 1.4;
+    word-break: break-all;
+    overflow-wrap: anywhere;
+    max-width: 100%;
+    padding: 0;
+    margin-bottom: 8px;
+  }
+  
+  .scan-info {
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+  }
+  
+  .format-badge, .confidence-badge, .timestamp {
+    font-size: 0.75rem;
+    padding: 3px 6px;
+  }
+  
+  .scan-details {
+    font-size: 0.8rem;
+    margin-top: 8px;
+  }
+  
   .controls {
     flex-direction: column;
   }
@@ -743,13 +781,50 @@ onBeforeUnmount(() => {
     width: 100%;
   }
   
-  .scan-info {
-    flex-direction: column;
-    align-items: center;
-  }
-  
   .debug-stats {
     grid-template-columns: 1fr;
+  }
+  
+  .debug-buffer {
+    font-size: 0.8rem;
+    padding: 8px;
+    word-break: break-all;
+    overflow-wrap: anywhere;
+  }
+}
+
+/* Extra small devices */
+@media (max-width: 480px) {
+  .barcode-reader-container {
+    padding: 10px;
+  }
+  
+  .header h2 {
+    font-size: 1.4rem;
+  }
+  
+  .scanner-area {
+    height: 100px;
+    padding: 10px;
+  }
+  
+  .scanned-code {
+    font-size: 0.9rem;
+    line-height: 1.3;
+  }
+  
+  .format-badge, .confidence-badge, .timestamp {
+    font-size: 0.7rem;
+    padding: 2px 4px;
+  }
+  
+  .scan-details {
+    font-size: 0.75rem;
+  }
+  
+  .controls button {
+    padding: 8px 15px;
+    font-size: 0.9rem;
   }
 }
 </style>
