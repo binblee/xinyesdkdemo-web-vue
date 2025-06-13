@@ -7,6 +7,7 @@
     <CameraTestDemo v-if="currentView === 'camera'" />
     <MicrophoneTestDemo v-if="currentView === 'microphone'" />
     <BarcodeReaderDemo v-if="currentView === 'barcode'" />
+    <VideoPlayerDemo v-if="currentView === 'video'" />
   </div>
 </template>
 
@@ -17,6 +18,7 @@ import XunfeiTtsDemo from './XunfeiTtsDemo.vue';
 import CameraTestDemo from './CameraTestDemo.vue';
 import MicrophoneTestDemo from './MicrophoneTestDemo.vue';
 import BarcodeReaderDemo from './BarcodeReaderDemo.vue';
+import VideoPlayerDemo from './VideoPlayerDemo.vue';
 
 defineProps({
   currentView: String
