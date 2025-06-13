@@ -1,9 +1,9 @@
 <template>
   <div class="app-navigator">
-    <button @click="navigateTo('print')">芯烨打印机</button>
-    <button @click="navigateTo('vrm')">数字人</button>
-    <button @click="navigateTo('tts')">讯飞TTS</button>
-    <button @click="navigateTo('video')">视频</button>
+    <button @click="navigateTo('print')">芯烨打印机测试</button>
+    <button @click="navigateTo('vrm')">数字人演示</button>
+    <button @click="navigateTo('tts')">讯飞TTS演示</button>
+    <button @click="navigateTo('video')">视频播放</button>
     <button @click="navigateTo('camera')">摄像头测试</button>
     <button @click="navigateTo('microphone')">麦克风测试</button>
     <button @click="navigateTo('barcode')">扫码器测试</button>
