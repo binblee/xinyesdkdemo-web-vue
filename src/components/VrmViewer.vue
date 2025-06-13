@@ -16,7 +16,6 @@
         <button @click="raiseLeftArmForward">Raise Left Arm</button>
         <button @click="raiseRightArmForward">Raise Right Arm</button>
         <button @click="resetArmPose">Reset Arms (T-Pose)</button>
-        <button @click="forceResize" style="background-color: #ff6b6b;">🔄 Fix Display</button>
       </div>
     </div>
   </div>
@@ -117,103 +116,24 @@ function handleResize() {
 }
 
 function handleOrientationChange() {
-  // Handle orientation changes with more aggressive approach
+  // Handle orientation changes with longer delay to ensure DOM is ready
   clearTimeout(orientationChangeTimeout);
-  
-  // First attempt - immediate but gentle
-  setTimeout(() => {
-    attemptResize('immediate');
-  }, 100);
-  
-  // Second attempt - more aggressive after DOM settles
   orientationChangeTimeout = setTimeout(() => {
-    attemptResize('delayed');
-  }, 800);
-  
-  // Final attempt - most aggressive for stubborn cases
-  setTimeout(() => {
-    attemptResize('final');
-  }, 1500);
-}
-
-function attemptResize(phase) {
-  console.log(`VRM resize attempt: ${phase}`);
-  
-  if (!canvasContainer.value) {
-    console.warn(`VRM resize ${phase}: no container`);
-    return;
-  }
-  
-  const container = canvasContainer.value;
-  
-  if (phase === 'delayed' || phase === 'final') {
-    // Force complete DOM recalculation
-    const parent = container.parentElement;
-    if (parent) {
-      // Force parent container to recalculate
-      parent.style.height = parent.style.height || '';
-      parent.offsetHeight; // Trigger reflow
+    // Force a complete recalculation after orientation change
+    if (canvasContainer.value) {
+      // Temporarily force container to recalculate its size
+      const container = canvasContainer.value;
+      const currentDisplay = container.style.display;
+      container.style.display = 'none';
+      container.offsetHeight; // Trigger reflow
+      container.style.display = currentDisplay;
+      
+      // Now resize with the new dimensions
+      setTimeout(() => {
+        onWindowResize();
+      }, 50);
     }
-    
-    // Force container recalculation
-    container.style.display = 'none';
-    container.style.width = '';
-    container.style.height = '';
-    container.offsetHeight; // Trigger reflow
-    container.style.display = '';
-    
-    // Wait for reflow to complete
-    setTimeout(() => {
-      forceRendererResize(phase);
-    }, 50);
-  } else {
-    forceRendererResize(phase);
-  }
-}
-
-function forceRendererResize(phase) {
-  if (!camera || !renderer || !canvasContainer.value) {
-    console.warn(`VRM resize ${phase}: missing components`);
-    return;
-  }
-  
-  const container = canvasContainer.value;
-  let width = container.clientWidth;
-  let height = container.clientHeight;
-  
-  console.log(`VRM resize ${phase}: container dimensions ${width}x${height}`);
-  
-  // If we still don't have valid dimensions, use viewport as fallback
-  if (width <= 0 || height <= 0) {
-    width = window.innerWidth;
-    height = window.innerHeight;
-    console.log(`VRM resize ${phase}: using viewport fallback ${width}x${height}`);
-  }
-  
-  // For portrait mode, adjust for UI panel
-  if (height > width && phase !== 'immediate') {
-    // Estimate UI panel height and subtract from available height
-    const uiPanel = container.parentElement?.querySelector('.ui-panel');
-    const uiPanelHeight = uiPanel ? uiPanel.offsetHeight : 150;
-    height = Math.max(200, height - uiPanelHeight);
-    console.log(`VRM resize ${phase}: adjusted for UI panel, new height ${height}`);
-  }
-  
-  // Update camera
-  const newAspect = width / height;
-  camera.aspect = newAspect;
-  camera.updateProjectionMatrix();
-  
-  // Update renderer
-  renderer.setSize(width, height);
-  renderer.setPixelRatio(window.devicePixelRatio);
-  
-  // Force immediate render
-  if (currentVrm && scene) {
-    renderer.render(scene, camera);
-  }
-  
-  console.log(`VRM resize ${phase}: completed with aspect ${newAspect.toFixed(3)}`);
+  }, 500); // Longer delay for orientation changes
 }
 
 function onWindowResize() {
@@ -227,7 +147,6 @@ function onWindowResize() {
   
   // Ensure we have valid dimensions
   if (width <= 0 || height <= 0) {
-    console.warn(`VRM resize: invalid dimensions ${width}x${height}, retrying...`);
     // Retry after a short delay if dimensions aren't ready
     setTimeout(() => {
       onWindowResize();
@@ -247,8 +166,6 @@ function onWindowResize() {
   if (currentVrm && scene) {
     renderer.render(scene, camera);
   }
-  
-  console.log(`VRM regular resize: ${width}x${height}, aspect: ${(width/height).toFixed(3)}`);
 }
 
 async function loadVrm(vrmUrl) {
@@ -435,8 +352,9 @@ function raiseRightArmForward() {
 
 // Force a complete resize recalculation (useful for debugging orientation issues)
 function forceResize() {
-  console.log('VRM force resize triggered');
-  attemptResize('manual');
+  setTimeout(() => {
+    onWindowResize();
+  }, 100);
 }
 
 // Expose forceResize for debugging purposes (can be called from browser console)
@@ -451,31 +369,18 @@ if (typeof window !== 'undefined') {
   flex-direction: column;
   width: 100%;
   height: 100vh; /* Use full viewport height for better mobile support */
-  height: 100dvh; /* Use dynamic viewport height if supported */
   max-height: 100vh;
-  max-height: 100dvh;
   min-height: 400px; /* Minimum height fallback */
   position: relative;
-  overflow: hidden; /* Prevent any overflow during transitions */
 }
 
 .canvas-area { /* ADDED: Style for the canvas container */
   flex-grow: 1;
-  flex-shrink: 1;
   width: 100%;
   min-height: 0; /* Important for flex children */
   position: relative; /* If canvas inside needs absolute positioning */
   overflow: hidden; /* ADDED: Prevent content from spilling out and overlapping siblings */
-  transition: none; /* Remove transitions that might interfere with orientation changes */
-  background: #f0f0f0; /* Add background to help debug sizing issues */
-}
-
-/* Force canvas to fill container properly */
-.canvas-area canvas {
-  display: block;
-  width: 100% !important;
-  height: 100% !important;
-  object-fit: contain;
+  transition: all 0.3s ease; /* Smooth transition during orientation changes */
 }
 
 .ui-panel { /* ADDED: New panel for all UI controls */
@@ -506,20 +411,12 @@ if (typeof window !== 'undefined') {
   .vrm-viewer-container {
     height: 100vh;
     height: 100dvh; /* Use dynamic viewport height if supported */
-    min-height: unset; /* Remove min-height on mobile */
-  }
-  
-  .canvas-area {
-    /* Ensure canvas area takes priority on mobile */
-    flex-basis: 0;
-    min-height: 200px; /* Minimum canvas height */
   }
   
   .ui-panel {
     max-height: 150px;
     min-height: 100px;
     padding: 8px;
-    flex-shrink: 0; /* Prevent UI panel from shrinking too much */
   }
   
   .controls {
@@ -539,68 +436,43 @@ if (typeof window !== 'undefined') {
 /* Landscape orientation optimizations */
 @media (max-width: 768px) and (orientation: landscape) {
   .vrm-viewer-container {
-    height: 100vh !important;
-    height: 100dvh !important;
-    max-height: 100vh !important;
-    max-height: 100dvh !important;
-  }
-  
-  .canvas-area {
-    flex-grow: 3; /* Give more space to canvas in landscape */
-    min-height: 150px;
+    height: 100vh;
+    height: 100dvh;
   }
   
   .ui-panel {
-    max-height: 100px !important;
-    min-height: 60px !important;
-    flex-shrink: 0;
+    max-height: 120px;
+    min-height: 80px;
   }
   
   .controls {
-    padding: 2px;
-    gap: 3px;
+    padding: 3px;
+    gap: 4px;
   }
   
   .controls button {
-    padding: 3px 6px;
-    font-size: 10px;
-    min-width: 60px;
-    max-width: 90px;
+    padding: 4px 8px;
+    font-size: 11px;
+    min-width: 70px;
+    max-width: 100px;
   }
 }
 
 /* Portrait orientation optimizations */
 @media (max-width: 768px) and (orientation: portrait) {
   .vrm-viewer-container {
-    height: 100vh !important;
-    height: 100dvh !important;
-    max-height: 100vh !important;
-    max-height: 100dvh !important;
+    height: 100vh;
+    height: 100dvh;
   }
   
   .canvas-area {
-    /* Give substantial space to canvas in portrait */
-    flex-grow: 4;
-    flex-basis: 0;
-    min-height: 300px;
+    /* Give more space to the 3D view in portrait mode */
+    flex-grow: 2;
   }
   
   .ui-panel {
-    max-height: 160px !important;
-    min-height: 100px !important;
-    flex-shrink: 0;
-  }
-  
-  .controls {
-    padding: 5px;
-    gap: 5px;
-  }
-  
-  .controls button {
-    padding: 8px 12px;
-    font-size: 11px;
-    min-width: 70px;
-    max-width: 110px;
+    max-height: 180px;
+    min-height: 120px;
   }
 }
 
