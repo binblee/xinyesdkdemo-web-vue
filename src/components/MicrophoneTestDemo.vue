@@ -1,19 +1,19 @@
 <template>
   <div class="microphone-test-demo">
     <div class="header">
-      <h2>🎤 Microphone Test Demo</h2>
-      <p>Test microphone access, recording, and audio quality</p>
+      <h2>🎤 麦克风测试演示</h2>
+      <p>测试麦克风访问、录音和音频质量</p>
     </div>
 
     <!-- Audio Visualization Area -->
     <div class="audio-visualization-container">
       <div class="vu-meter-wrapper">
-        <label>VU Meter:</label>
+        <label>音量表:</label>
         <progress ref="vuMeter" max="100" value="0"></progress>
         <span class="vu-value">{{ vuMeterLevel.toFixed(2) }}%</span>
       </div>
       <div class="waveform-wrapper">
-        <label>Waveform:</label>
+        <label>波形:</label>
         <canvas ref="waveformCanvas" width="300" height="100"></canvas>
       </div>
     </div>
@@ -22,61 +22,61 @@
     <div class="controls-panel">
       <div class="basic-controls">
         <button @click="startMicrophone" :disabled="isLoading || isMicrophoneActive" class="btn btn-primary">
-          {{ isLoading ? 'Starting...' : 'Start Microphone' }}
+          {{ isLoading ? '启动中...' : '启动麦克风' }}
         </button>
         <button @click="stopMicrophone" :disabled="!isMicrophoneActive" class="btn btn-secondary">
-          Stop Microphone
+          停止麦克风
         </button>
         <select v-model="selectedMicrophoneId" @change="switchMicrophone" :disabled="!availableMicrophones.length || isLoading || isMicrophoneActive" class="microphone-select">
-          <option value="" disabled>Select Microphone</option>
+          <option value="" disabled>选择麦克风</option>
           <option v-for="mic in availableMicrophones" :key="mic.deviceId" :value="mic.deviceId">
-            {{ mic.label || `Microphone ${mic.deviceId.slice(0, 8)}...` }}
+            {{ mic.label || `麦克风 ${mic.deviceId.slice(0, 8)}...` }}
           </option>
         </select>
       </div>
 
       <div class="recording-controls" v-if="isMicrophoneActive">
-        <h4>🎙️ Recording</h4>
-        <button @click="startRecording(5000)" :disabled="isRecording" class="btn btn-success">Record 5s</button>
-        <button @click="startRecording(10000)" :disabled="isRecording" class="btn btn-success">Record 10s</button>
-        <button @click="startRecording(30000)" :disabled="isRecording" class="btn btn-success">Record 30s</button>
-        <button @click="stopRecording" :disabled="!isRecording" class="btn btn-warning">Stop Recording</button>
+        <h4>🎙️ 录音</h4>
+        <button @click="startRecording(5000)" :disabled="isRecording" class="btn btn-success">录制5秒</button>
+        <button @click="startRecording(10000)" :disabled="isRecording" class="btn btn-success">录制10秒</button>
+        <button @click="startRecording(30000)" :disabled="isRecording" class="btn btn-success">录制30秒</button>
+        <button @click="stopRecording" :disabled="!isRecording" class="btn btn-warning">停止录音</button>
         <div v-if="recordedAudioUrl" class="playback-controls">
           <audio :src="recordedAudioUrl" controls></audio>
-          <button @click="downloadRecording" class="btn btn-info">Download Recording</button>
+          <button @click="downloadRecording" class="btn btn-info">下载录音</button>
         </div>
-        <p v-if="isRecording">Recording for {{ (recordingDuration / 1000).toFixed(0) }}s... {{ (recordingTimeLeft / 1000).toFixed(1) }}s left</p>
+        <p v-if="isRecording">正在录制 {{ (recordingDuration / 1000).toFixed(0) }}秒... 剩余 {{ (recordingTimeLeft / 1000).toFixed(1) }}秒</p>
       </div>
     </div>
 
     <!-- Status & Information Panel -->
     <div class="status-panel">
       <div class="device-info">
-        <h3>📊 Audio Device Information</h3>
+        <h3>📊 音频设备信息</h3>
         <div class="info-grid">
           <div class="info-item">
-            <span class="label">Available Microphones:</span>
+            <span class="label">可用麦克风:</span>
             <span class="value">{{ availableMicrophones.length }}</span>
           </div>
           <div class="info-item">
-            <span class="label">Browser Support:</span>
-            <span class="value">{{ browserSupport ? '✅ Supported' : '❌ Not Supported' }}</span>
+            <span class="label">浏览器支持:</span>
+            <span class="value">{{ browserSupport ? '✅ 支持' : '❌ 不支持' }}</span>
           </div>
           <div class="info-item">
-            <span class="label">Permissions:</span>
+            <span class="label">权限状态:</span>
             <span class="value">{{ permissionStatus }}</span>
           </div>
           <div class="info-item">
-            <span class="label">Current Microphone:</span>
+            <span class="label">当前麦克风:</span>
             <span class="value">{{ currentMicrophoneLabel }}</span>
           </div>
           <div class="info-item">
-            <span class="label">Sample Rate:</span>
-            <span class="value">{{ sampleRate ? sampleRate + ' Hz' : 'N/A' }}</span>
+            <span class="label">采样率:</span>
+            <span class="value">{{ sampleRate ? sampleRate + ' Hz' : '不适用' }}</span>
           </div>
           <div class="info-item">
-            <span class="label">Bit Depth:</span>
-            <span class="value">{{ bitDepth ? bitDepth + '-bit' : 'N/A (Usually 16-bit or 24-bit in browsers)' }}</span>
+            <span class="label">位深度:</span>
+            <span class="value">{{ bitDepth ? bitDepth + '-bit' : '不适用 (浏览器通常为16位或24位)' }}</span>
           </div>
         </div>
       </div>
@@ -128,7 +128,7 @@ export default {
       
       // Support & permissions
       browserSupport: false,
-      permissionStatus: 'Unknown',
+      permissionStatus: '未知',
     };
   },
   
@@ -141,7 +141,7 @@ export default {
         this.waveformCanvasCtx = this.$refs.waveformCanvas.getContext('2d');
       }
     } else {
-      this.error = 'Audio access not supported by this browser. Please use a modern browser with HTTPS.';
+      this.error = '此浏览器不支持音频访问。请使用支持HTTPS的现代浏览器。';
     }
   },
   
@@ -164,14 +164,14 @@ export default {
           permission.onchange = () => {
             this.permissionStatus = permission.state;
             if (permission.state === 'denied') {
-              this.error = 'Microphone permission denied.';
+              this.error = '麦克风权限被拒绝。';
               this.stopMicrophone();
             }
           };
         }
       } catch (e) {
         console.warn('Could not check microphone permissions:', e);
-        this.permissionStatus = 'Error checking';
+        this.permissionStatus = '权限检查错误';
       }
     },
 
@@ -182,10 +182,10 @@ export default {
         if (this.availableMicrophones.length > 0 && !this.selectedMicrophoneId) {
           this.selectedMicrophoneId = this.availableMicrophones[0].deviceId;
         } else if (this.availableMicrophones.length === 0) {
-          this.error = 'No microphones found.';
+          this.error = '未找到麦克风。';
         }
       } catch (e) {
-        this.handleAudioError(e, 'Error enumerating audio devices');
+        this.handleAudioError(e, '枚举音频设备时出错');
       }
     },
 
@@ -199,10 +199,10 @@ export default {
 
       try {
         if (!this.browserSupport) {
-          throw new Error('getUserMedia not supported in this browser.');
+          throw new Error('此浏览器不支持getUserMedia。');
         }
         if (this.permissionStatus === 'denied') {
-          throw new Error('Microphone permission denied. Please grant permission in browser settings.');
+          throw new Error('麦克风权限被拒绝。请在浏览器设置中授予权限。');
         }
 
         const constraints = {
@@ -219,7 +219,7 @@ export default {
         this.currentStream = await navigator.mediaDevices.getUserMedia(constraints);
         
         const selectedDevice = this.availableMicrophones.find(mic => mic.deviceId === this.selectedMicrophoneId);
-        this.currentMicrophoneLabel = selectedDevice ? selectedDevice.label : 'Default Microphone';
+        this.currentMicrophoneLabel = selectedDevice ? selectedDevice.label : '默认麦克风';
 
         this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
         this.sampleRate = this.audioContext.sampleRate;
@@ -237,7 +237,7 @@ export default {
         this.visualizeAudio();
 
       } catch (e) {
-        this.handleAudioError(e, 'Error starting microphone');
+        this.handleAudioError(e, '启动麦克风时出错');
       } finally {
         this.isLoading = false;
       }
@@ -332,7 +332,7 @@ export default {
 
     startRecording(duration) {
       if (!this.isMicrophoneActive || this.isRecording || !this.currentStream) {
-        this.error = "Microphone not active or already recording.";
+        this.error = "麦克风未启动或已在录音中。";
         return;
       }
       this.isRecording = true;
@@ -386,7 +386,7 @@ export default {
         }, duration);
 
       } catch (e) {
-        this.handleAudioError(e, "Error starting recording");
+        this.handleAudioError(e, '启动录音时出错');
         this.isRecording = false;
       }
     },
@@ -411,7 +411,7 @@ export default {
       URL.revokeObjectURL(this.recordedAudioUrl); // Clean up blob URL after a delay
     },
 
-    handleAudioError(e, contextMessage = 'An audio error occurred') {
+    handleAudioError(e, contextMessage = '发生音频错误') {
       console.error(contextMessage, e);
       let displayError = `${contextMessage}: ${e.message}`;
       if (e.name) {
@@ -419,16 +419,16 @@ export default {
       }
       
       if (e.name === 'NotAllowedError' || e.name === 'PermissionDeniedError') {
-        this.error = 'Microphone access denied. Please grant permission in your browser settings.';
+        this.error = '麦克风访问被拒绝。请在浏览器设置中授予权限。';
         this.permissionStatus = 'denied';
       } else if (e.name === 'NotFoundError' || e.name === 'DevicesNotFoundError') {
-        this.error = 'No microphone found or the selected microphone is not available.';
+        this.error = '未找到麦克风或所选麦克风不可用。';
       } else if (e.name === 'NotReadableError' || e.name === 'TrackStartError') {
-        this.error = 'Microphone is already in use or a hardware error occurred.';
+        this.error = '麦克风正在被其他应用使用或发生硬件错误。';
       } else if (e.name === 'OverconstrainedError') {
-        this.error = `The selected microphone does not support the requested settings (e.g., sample rate). Details: ${e.constraint}`;
+        this.error = `所选麦克风不支持请求的设置（例如采样率）。详情: ${e.constraint}`;
       } else if (e.name === 'SecurityError') {
-        this.error = 'Microphone access denied due to security settings (e.g., not on HTTPS).';
+        this.error = '由于安全设置（例如非HTTPS）麦克风访问被拒绝。';
       } else {
         this.error = displayError;
       }

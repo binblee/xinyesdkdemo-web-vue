@@ -2,7 +2,7 @@
   <div class="video-player-container">
     <!-- Header -->
     <div class="header">
-      <h2>🎬 Video Player Demo</h2>
+      <h2>🎬 视频播放演示</h2>
     </div>
 
     <!-- Video Player -->
@@ -27,20 +27,20 @@
         preload="metadata"
         playsinline
       >
-        Your browser does not support the video tag.
+        您的浏览器不支持视频标签。
       </video>
 
       <!-- Loading Spinner -->
       <div v-if="isLoading" class="loading-overlay">
         <div class="spinner"></div>
-        <p>Loading video...</p>
+        <p>正在加载视频...</p>
       </div>
 
       <!-- Error State -->
       <div v-if="hasError" class="error-overlay">
         <div class="error-icon">⚠️</div>
-        <p>Failed to load video</p>
-        <button @click="retryLoad" class="retry-button">Retry</button>
+        <p>视频加载失败</p>
+        <button @click="retryLoad" class="retry-button">重试</button>
       </div>
 
       <!-- Controls Overlay -->
@@ -126,7 +126,7 @@
 
     <!-- Video Source Selector -->
     <div class="video-selector">
-      <h3>📺 Select Video Source:</h3>
+      <h3>📺 选择视频源:</h3>
       <div class="source-buttons">
         <button 
           v-for="source in videoSources" 
@@ -144,35 +144,35 @@
         <input 
           type="url" 
           v-model="customUrl" 
-          placeholder="Enter custom video URL..."
+          placeholder="输入自定义视频URL..."
           class="url-input"
         >
         <button @click="loadCustomUrl" :disabled="!customUrl" class="load-button">
-          Load
+          加载
         </button>
       </div>
     </div>
 
     <!-- Video Info -->
     <div v-if="videoInfo.loaded" class="video-info">
-      <h4>📊 Video Information:</h4>
+      <h4>📊 视频信息:</h4>
       <div class="info-grid">
         <div class="info-item">
-          <label>Duration:</label>
+          <label>时长:</label>
           <span>{{ formatTime(duration) }}</span>
         </div>
         <div class="info-item">
-          <label>Resolution:</label>
+          <label>分辨率:</label>
           <span>{{ videoInfo.width }}x{{ videoInfo.height }}</span>
         </div>
         <div class="info-item">
-          <label>Status:</label>
+          <label>状态:</label>
           <span :class="isPlaying ? 'status-playing' : 'status-paused'">
-            {{ isPlaying ? 'Playing' : 'Paused' }}
+            {{ isPlaying ? '播放中' : '已暂停' }}
           </span>
         </div>
         <div class="info-item">
-          <label>Current Time:</label>
+          <label>当前时间:</label>
           <span>{{ formatTime(currentTime) }}</span>
         </div>
       </div>

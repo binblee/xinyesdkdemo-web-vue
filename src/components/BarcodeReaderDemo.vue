@@ -2,7 +2,7 @@
   <div class="barcode-reader-container">
     <!-- Header -->
     <div class="header">
-      <h2>📱 Barcode Scanner Demo</h2>
+      <h2>📱 扫码器测试</h2>
     </div>
 
     <!-- Main Scanner Area -->
@@ -45,9 +45,9 @@
 
     <!-- Controls -->
     <div class="controls">
-      <button @click="clearLastScan" :disabled="!lastScan">Clear Result</button>
-      <button @click="toggleDebug">{{ showDebug ? 'Hide' : 'Show' }} Debug</button>
-      <button @click="focusScanner">Focus Scanner</button>
+      <button @click="clearLastScan" :disabled="!lastScan">清除</button>
+      <button @click="toggleDebug">{{ showDebug ? '隐藏' : '显示' }}调试信息</button>
+      <button @click="focusScanner">聚焦扫描器</button>
     </div>
 
     <!-- Debug Panel -->

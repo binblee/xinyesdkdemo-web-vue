@@ -1,6 +1,6 @@
 <template>
   <div>
-    <button @click="goBackToNavigator" class="back-button">Back</button>
+    <button @click="goBackToNavigator" class="back-button">返回</button>
     <VrmViewer v-if="currentView === 'vrm'" />
     <PrintView v-if="currentView === 'print'" />
     <XunfeiTtsDemo v-if="currentView === 'tts'" />

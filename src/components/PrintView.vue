@@ -1,35 +1,35 @@
 <template>
 	<view class="container">
 		<view class="section">
-			<text class="section-title">Native Bridge Communication</text>
-			<button @click="handleShowNativeToast" class="action-btn">Show Android Toast</button>
-			<button @click="handleSendDataToNative" class="action-btn">Send Data & Get Response</button>
-			<button @click="handleNotifyActivity" class="action-btn">Notify Activity</button>
+			<text class="section-title">原生桥接通信</text>
+			<button @click="handleShowNativeToast" class="action-btn">显示Toast</button>
+			<button @click="handleSendDataToNative" class="action-btn">发送数据并获取响应</button>
+			<button @click="handleNotifyActivity" class="action-btn">通知活动</button>
 		</view>
 
 		<view class="section">
-			<text class="section-title">Text Printing</text>
-			<button @click="handlePrintSampleTextFromJSPrinterBridge" class="action-btn">Print Sample Text</button>
-			<button @click="handleMultiLineTextPrint" class="action-btn">Print Multi-line Text</button>
+			<text class="section-title">文本打印</text>
+			<button @click="handlePrintSampleTextFromJSPrinterBridge" class="action-btn">打印示例文本</button>
+			<button @click="handleMultiLineTextPrint" class="action-btn">打印多行文本</button>
 		</view>
 
 		<view class="section">
-			<text class="section-title">Barcode Printing</text>
-			<button @click="handleBarCodePrint('ty1234567890123')" class="action-btn">Print Barcode</button>
-			<button @click="handleQRCodePrint('https://ibm.com')" class="action-btn">Print QR code</button>
+			<text class="section-title">条码打印</text>
+			<button @click="handleBarCodePrint('ty1234567890123')" class="action-btn">打印条码</button>
+			<button @click="handleQRCodePrint('https://ibm.com')" class="action-btn">打印二维码</button>
 		</view>
 
 		<view class="section">
-			<text class="section-title">Bar & Box</text>
-			<button @click="handleBarAndBoxPrint" class="action-btn">Print Bar & Box</button>
+			<text class="section-title">线条与框形</text>
+			<button @click="handleBarAndBoxPrint" class="action-btn">打印线条与框形</button>
 		</view>
 
 		<view class="section">
-			<text class="section-title">Printer Status</text>
-			<button @click="handleGetPrinterStatus" class="action-btn">Get Printer Status</button>
+			<text class="section-title">打印机状态</text>
+			<button @click="handleGetPrinterStatus" class="action-btn">获取打印机状态</button>
 			<view v-if="printerStatus !== null || statusError !== null" class="status-display">
-				<text v-if="printerStatus" class="status-text success">Status: {{ printerStatus }}</text>
-				<text v-if="statusError" class="status-text error">Error: {{ statusError }}</text>
+				<text v-if="printerStatus" class="status-text success">状态: {{ printerStatus }}</text>
+				<text v-if="statusError" class="status-text error">错误: {{ statusError }}</text>
 			</view>
 		</view>
 	</view>
@@ -129,7 +129,7 @@ export default {
             this.statusError = null;   // Reset previous error
 
             if (!this.jsPrinter || !this.jsPrinter.isAvailable()) {
-                this.statusError = "Printer interface is not available.";
+                this.statusError = "打印机接口不可用。";
                 console.error("handleGetPrinterStatus: Printer interface not available.");
                 return;
             }

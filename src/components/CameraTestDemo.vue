@@ -1,8 +1,8 @@
 <template>
   <div class="camera-test-demo">
     <div class="header">
-      <h2>📹 Camera Test Demo</h2>
-      <p>Basic camera access, preview, and device testing</p>
+      <h2>📹 摄像头测试演示</h2>
+      <p>基本摄像头访问、预览和设备测试</p>
     </div>
 
     <!-- Camera Preview Area -->
@@ -19,15 +19,15 @@
         <!-- Camera Info Overlay -->
         <div class="camera-info" v-if="isCameraActive">
           <div class="info-item">
-            <span class="label">Resolution:</span>
+            <span class="label">分辨率:</span>
             <span class="value">{{ currentResolution }}</span>
           </div>
           <div class="info-item">
-            <span class="label">FPS:</span>
+            <span class="label">帧率:</span>
             <span class="value">{{ currentFps }}</span>
           </div>
           <div class="info-item">
-            <span class="label">Camera:</span>
+            <span class="label">摄像头:</span>
             <span class="value">{{ currentCameraLabel }}</span>
           </div>
         </div>
@@ -36,14 +36,14 @@
         <div class="camera-placeholder" v-if="!isCameraActive">
           <div v-if="isLoading" class="loading-state">
             <div class="spinner"></div>
-            <p>Starting camera...</p>
+            <p>正在启动摄像头...</p>
           </div>
           <div v-else-if="error" class="error-state">
             <p class="error-message">❌ {{ error }}</p>
-            <button @click="requestPermissions" class="retry-btn">Retry</button>
+            <button @click="requestPermissions" class="retry-btn">重试</button>
           </div>
           <div v-else class="initial-state">
-            <p>📷 Click "Start Camera" to begin</p>
+            <p>📷 点击"启动摄像头"开始</p>
           </div>
         </div>
       </div>
@@ -57,7 +57,7 @@
           :disabled="isLoading || isCameraActive"
           class="btn btn-primary"
         >
-          {{ isLoading ? 'Starting...' : 'Start Camera' }}
+          {{ isLoading ? '启动中...' : '启动摄像头' }}
         </button>
         
         <button 
@@ -65,7 +65,7 @@
           :disabled="!isCameraActive"
           class="btn btn-secondary"
         >
-          Stop Camera
+          停止摄像头
         </button>
 
         <select 
@@ -74,7 +74,7 @@
           :disabled="!availableCameras.length || isLoading"
           class="camera-select"
         >
-          <option value="" disabled>Select Camera</option>
+          <option value="" disabled>选择摄像头</option>
           <option 
             v-for="camera in availableCameras" 
             :key="camera.deviceId"
@@ -87,9 +87,9 @@
 
       <div class="advanced-controls">
         <div class="resolution-controls">
-          <label>Resolution:</label>
+          <label>分辨率:</label>
           <select v-model="selectedResolution" @change="applyResolution" :disabled="!isCameraActive">
-            <option value="auto">Auto</option>
+            <option value="auto">自动</option>
             <option value="480p">480p (640×480)</option>
             <option value="720p">720p (1280×720)</option>
             <option value="1080p">1080p (1920×1080)</option>
@@ -101,37 +101,37 @@
     <!-- Status & Information Panel -->
     <div class="status-panel">
       <div class="device-info">
-        <h3>📱 Device Information</h3>
+        <h3>📱 设备信息</h3>
         <div class="info-grid">
           <div class="info-item">
-            <span class="label">Available Cameras:</span>
+            <span class="label">可用摄像头:</span>
             <span class="value">{{ availableCameras.length }}</span>
           </div>
           <div class="info-item">
-            <span class="label">Browser Support:</span>
-            <span class="value">{{ browserSupport ? '✅ Supported' : '❌ Not Supported' }}</span>
+            <span class="label">浏览器支持:</span>
+            <span class="value">{{ browserSupport ? '✅ 支持' : '❌ 不支持' }}</span>
           </div>
           <div class="info-item">
-            <span class="label">Permissions:</span>
+            <span class="label">权限状态:</span>
             <span class="value">{{ permissionStatus }}</span>
           </div>
           <div class="info-item">
-            <span class="label">Is WebView:</span>
-            <span class="value">{{ isWebView() ? '📱 Yes' : '🖥️ No' }}</span>
+            <span class="label">是否WebView:</span>
+            <span class="value">{{ isWebView() ? '📱 是' : '🖥️ 否' }}</span>
           </div>
           <div class="info-item">
-            <span class="label">Protocol:</span>
+            <span class="label">协议:</span>
             <span class="value">{{ currentProtocol }}</span>
           </div>
           <div class="info-item">
-            <span class="label">User Agent:</span>
+            <span class="label">用户代理:</span>
             <span class="value" style="font-size: 10px; word-break: break-all;">{{ userAgentSlice }}</span>
           </div>
         </div>
       </div>
 
       <div class="camera-capabilities" v-if="currentCapabilities">
-        <h3>📋 Camera Capabilities</h3>
+        <h3>📋 摄像头功能</h3>
         <div class="capabilities-grid">
           <div class="capability-item" v-for="(value, key) in displayCapabilities" :key="key">
             <span class="label">{{ formatCapabilityName(key) }}:</span>
@@ -142,43 +142,43 @@
 
       <!-- WebView Debug Panel -->
       <div class="webview-debug" v-if="isWebView()">
-        <h3>🤖 WebView Debug Panel</h3>
+        <h3>🤖 WebView调试面板</h3>
         <div class="debug-controls">
           <button @click="runWebViewDiagnostics" class="btn btn-secondary">
-            🔧 Run WebView Diagnostics
+            🔧 运行WebView诊断
           </button>
           <button @click="testAndroidBridge" class="btn btn-secondary" v-if="androidInterfaceAvailable.includes('✅')">
-            📱 Test Android Bridge
+            📱 测试Android桥接
           </button>
           <button @click="clearDebugLog" class="btn btn-outline">
-            🗑️ Clear Log
+            🗑️ 清除日志
           </button>
         </div>
         
         <div class="webview-info">
-          <h4>📊 WebView Information</h4>
+          <h4>📊 WebView信息</h4>
           <div class="webview-info-grid">
             <div class="info-item">
-              <span class="label">Chrome Version:</span>
+              <span class="label">Chrome版本:</span>
               <span class="value">{{ getChromeVersion() }}</span>
             </div>
             <div class="info-item">
-              <span class="label">Android Interface:</span>
+              <span class="label">Android接口:</span>
               <span class="value">{{ androidInterfaceAvailable }}</span>
             </div>
             <div class="info-item">
-              <span class="label">Screen Size:</span>
+              <span class="label">屏幕尺寸:</span>
               <span class="value">{{ currentScreenInfo }}</span>
             </div>
             <div class="info-item">
-              <span class="label">Pixel Ratio:</span>
+              <span class="label">像素比率:</span>
               <span class="value">{{ currentPixelRatio }}</span>
             </div>
           </div>
         </div>
 
         <div class="debug-log" v-if="debugLog.length > 0">
-          <h4>📝 Debug Log (Last {{ Math.min(debugLog.length, 10) }} entries)</h4>
+          <h4>📝 调试日志 (最近 {{ Math.min(debugLog.length, 10) }} 条记录)</h4>
           <div class="log-entries">
             <div v-for="(entry, index) in debugLog.slice(-10)" :key="index" 
                  class="log-entry" :class="entry.type">
@@ -189,7 +189,7 @@
         </div>
         
         <div v-else class="no-logs">
-          <p>📝 No debug logs yet. Click "Run WebView Diagnostics" to start logging.</p>
+          <p>📝 暂无调试日志。点击"运行WebView诊断"开始记录。</p>
         </div>
       </div>
     </div>

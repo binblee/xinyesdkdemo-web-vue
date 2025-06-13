@@ -1,12 +1,12 @@
 <template>
   <div class="app-navigator">
-    <button @click="navigateTo('vrm')">VRM Viewer</button>
-    <button @click="navigateTo('print')">Print View</button>
-    <button @click="navigateTo('tts')">Xunfei TTS Demo</button>
-    <button @click="navigateTo('camera')">Camera Test Demo</button>
-    <button @click="navigateTo('microphone')">Microphone Test Demo</button>
-    <button @click="navigateTo('barcode')">Barcode Reader Demo</button>
-    <button @click="navigateTo('video')">Video Player Demo</button>
+    <button @click="navigateTo('print')">芯烨打印机</button>
+    <button @click="navigateTo('vrm')">数字人</button>
+    <button @click="navigateTo('tts')">讯飞TTS</button>
+    <button @click="navigateTo('video')">视频</button>
+    <button @click="navigateTo('camera')">摄像头测试</button>
+    <button @click="navigateTo('microphone')">麦克风测试</button>
+    <button @click="navigateTo('barcode')">扫码器测试</button>
   </div>
 </template>
 

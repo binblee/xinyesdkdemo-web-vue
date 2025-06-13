@@ -7,15 +7,15 @@
     <div class="ui-panel">
       <!-- Controls -->
       <div class="controls">
-        <button @click="sayHello">Say Hello</button>
-        <button @click="setExpression('happy')">Happy</button>
-        <button @click="setExpression('angry')">Angry</button>
-        <button @click="setExpression('sad')">Sad</button>
-        <button @click="resetExpressions">Reset Expressions</button>
-        <button @click="putArmsDown">Arms Down</button>
-        <button @click="raiseLeftArmForward">Raise Left Arm</button>
-        <button @click="raiseRightArmForward">Raise Right Arm</button>
-        <button @click="resetArmPose">Reset Arms (T-Pose)</button>
+        <button @click="sayHello">打招呼</button>
+        <button @click="setExpression('happy')">开心</button>
+        <button @click="setExpression('angry')">生气</button>
+        <button @click="setExpression('sad')">悲伤</button>
+        <button @click="resetExpressions">重置表情</button>
+        <button @click="putArmsDown">手臂放下</button>
+        <button @click="raiseLeftArmForward">举左手</button>
+        <button @click="raiseRightArmForward">举右手</button>
+        <button @click="resetArmPose">重置手臂 (T字姿势)</button>
       </div>
     </div>
   </div>
